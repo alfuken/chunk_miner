@@ -1,0 +1,189 @@
+package lime.dumb_miner.tiles;
+
+import lime.dumb_miner.DumbMiner;
+import lime.dumb_miner.DumbMinerHelpers;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockAir;
+import net.minecraft.block.BlockDynamicLiquid;
+import net.minecraft.block.BlockStaticLiquid;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.fluids.IFluidBlock;
+
+import java.util.Iterator;
+import java.util.List;
+
+import static ic2.core.util.StackUtil.distribute;
+
+public class DumbMinerTile extends TileEntity {
+    private int work_progress = 0;
+    private int work_to_mine = 10;
+    private int ticker = 0;
+    private int ticks_to_mine = 5*20;
+    private int currX = -1;
+    private int currY = -1;
+    private int currZ = -1;
+    private int mineToY = 0;
+    public boolean redstone = false;
+    private ForgeChunkManager.Ticket chunkTicket;
+
+    public void setRedstone(boolean value){
+        this.redstone = value;
+    }
+
+    public void updateEntity(){
+        if (this.worldObj.isRemote || !redstone) return;
+        if (ticker >= ticks_to_mine){
+            ticker = 0;
+            if (this.work()) this.markDirty();
+        } else {
+            ticker++;
+        }
+    }
+
+    public boolean onUse(){
+        if (this.worldObj.isRemote) return true;
+        if (work_progress >= work_to_mine){
+            work_progress = 0;
+            if (this.work()) this.markDirty();
+        } else {
+            work_progress++;
+        }
+        return true;
+    }
+
+    private int mineFromY(){
+        return this.worldObj.getChunkFromBlockCoords(this.xCoord, this.zCoord).getTopFilledSegment() + 16;
+    }
+
+    private int mineToY(){
+        return mineToY;
+    }
+
+    private boolean work() {
+        if (this.worldObj.isRemote) return false;
+
+        Chunk c = this.worldObj.getChunkFromBlockCoords(this.xCoord, this.zCoord);
+
+        if (currY == -1) currY = mineFromY();
+
+        for (int y = currY; y > mineToY(); y--) {
+            if (y == mineToY()) getWorldObj().setBlockToAir(this.xCoord, this.yCoord, this.zCoord);
+//            if (y == mineToY()) setRedstone(false);
+
+            for (int x = c.xPosition * 16; x < c.xPosition * 16 + 16; x++) {
+                for (int z = c.zPosition * 16; z < c.zPosition * 16 + 16; z++) {
+                    currX = x;
+                    currY = y;
+                    currZ = z;
+                    if (shouldMine()) return doMine();
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public boolean doMine() {
+        Block block = this.worldObj.getBlock(this.currX, this.currY, this.currZ);
+        distributeDrop(this, block.getDrops(this.worldObj, this.currX, this.currY, this.currZ, this.worldObj.getBlockMetadata(this.currX, this.currY, this.currZ), 0));
+        this.worldObj.setBlockToAir(this.currX, this.currY, this.currZ);
+        return true;
+    }
+
+    public boolean shouldMine()
+    {
+        if(currY <= 0 || currY >= 255) return false;
+
+        Block block = this.worldObj.getBlock(this.currX, this.currY, this.currZ);
+
+        if (block instanceof BlockAir || block instanceof IFluidBlock || block instanceof BlockStaticLiquid || block instanceof BlockDynamicLiquid) return false;
+
+        if (block.getBlockHardness(this.worldObj, this.currX, this.currY, this.currZ) < 0.0F) return false;
+
+//        if (block.hasTileEntity(this.worldObj.getBlockMetadata(x,y,z)))
+        return DumbMinerHelpers.isValuable(this.worldObj, this.currX, this.currY, this.currZ);
+    }
+
+    public static void distributeDrop(TileEntity source, List<ItemStack> itemStacks) {
+        Iterator it = itemStacks.iterator();
+
+        ItemStack itemStack;
+        while(it.hasNext()) {
+            itemStack = (ItemStack)it.next();
+            int amount = distribute(source, itemStack, false);
+            if(amount == itemStack.stackSize) {
+                it.remove();
+            } else {
+                itemStack.stackSize -= amount;
+            }
+        }
+
+        it = itemStacks.iterator();
+
+        while(it.hasNext()) {
+            itemStack = (ItemStack)it.next();
+            dropAsEntity(source.getWorldObj(), source.xCoord, source.yCoord+1, source.zCoord, itemStack);
+        }
+
+        itemStacks.clear();
+    }
+
+    public static void dropAsEntity(World world, int x, int y, int z, ItemStack itemStack) {
+        if(itemStack != null) {
+            double f = 0.7D;
+            double dx = (double)world.rand.nextFloat() * f + (1.0D - f) * 0.5D;
+            double dy = (double)world.rand.nextFloat() * f + (1.0D - f) * 0.5D;
+            double dz = (double)world.rand.nextFloat() * f + (1.0D - f) * 0.5D;
+            EntityItem entityItem = new EntityItem(world, (double)x + dx, (double)y + dy, (double)z + dz, itemStack.copy());
+            entityItem.delayBeforeCanPickup = 10;
+            entityItem.motionX = 0;
+            entityItem.motionY = 1;
+            entityItem.motionZ = 0;
+            world.spawnEntityInWorld(entityItem);
+        }
+    }
+
+
+    @Override
+    public void validate() {
+        super.validate();
+        if ((!this.worldObj.isRemote) && (this.chunkTicket == null)) {
+            ForgeChunkManager.Ticket ticket = ForgeChunkManager.requestTicket(DumbMiner.INSTANCE, this.worldObj, ForgeChunkManager.Type.NORMAL);
+            if (ticket != null) {
+                forceChunkLoading(ticket);
+            }
+        }
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        stopChunkLoading();
+    }
+
+    public void forceChunkLoading(ForgeChunkManager.Ticket ticket) {
+        stopChunkLoading();
+        this.chunkTicket = ticket;
+
+        if (ticket != null) {
+            ticket.getModData().setInteger("x", this.xCoord);
+            ticket.getModData().setInteger("y", this.yCoord);
+            ticket.getModData().setInteger("z", this.zCoord);
+            ForgeChunkManager.forceChunk(this.chunkTicket, new ChunkCoordIntPair(this.xCoord / 16, this.zCoord / 16));
+        }
+    }
+
+    public void stopChunkLoading() {
+        if (this.chunkTicket != null) {
+            ForgeChunkManager.releaseTicket(this.chunkTicket);
+            this.chunkTicket = null;
+        }
+    }
+
+}

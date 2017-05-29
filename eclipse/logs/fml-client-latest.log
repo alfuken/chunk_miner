@@ -267,7 +267,7 @@ Details:
 [14:16:53] [Client thread/DEBUG] [FML/]: The mod container lwjgl-platform-2.9.1-natives-osx.jar appears to be missing an mcmod.info file
 [14:16:53] [Client thread/DEBUG] [FML/]: Examining file gtminer-1.7.10-1.jar for potential mods
 [14:16:53] [Client thread/TRACE] [FML/]: Located mcmod.info file in file gtminer-1.7.10-1.jar
-[14:16:53] [Client thread/DEBUG] [FML/]: Identified a mod of type Lcpw/mods/fml/common/Mod; (lime.gtminer.GtMiner) - loading
+[14:16:53] [Client thread/DEBUG] [FML/]: Identified a mod of type Lcpw/mods/fml/common/Mod; (lime.gtminer.DumbMiner) - loading
 [14:16:53] [Client thread/TRACE] [gtminer/]: Parsed dependency info : [] [] []
 [14:16:53] [Client thread/INFO] [FML/]: Forge Mod Loader has identified 4 mods to load
 [14:16:53] [Client thread/TRACE] [FML/]: Received a system property request ''
@@ -584,8 +584,8 @@ Details:
 [14:17:00] [Client thread/DEBUG] [FML/]: The fluid minecraft:water has been selected as the default fluid for water
 [14:17:00] [Client thread/INFO] [FML/]: [Client thread] Client side modded connection established
 [14:17:00] [Client thread/DEBUG] [FML/]: Overriding dimension: using 0
-[14:17:01] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.GtOreFinder:onItemRightClick:81]: 
+[14:17:01] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.DumbScanner:onItemRightClick:81]:
 ===> Scan took 11 milliseconds
-[14:17:01] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.GtOreFinder:onItemRightClick:82]: 
+[14:17:01] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.DumbScanner:onItemRightClick:82]:
 Other things found: [tile.bedrock, tile.stone, tile.dirt, tile.air, tile.gravel, tile.grass, tile.tallgrass, tile.leaves, tile.log, tile.vine]
 [14:17:03] [Server thread/DEBUG] [FML/]: Gathering id map for writing to world save New World

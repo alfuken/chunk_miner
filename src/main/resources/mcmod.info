@@ -1,8 +1,8 @@
 [
 {
-  "modid": "gtminer",
-  "name": "Gt Miner",
-  "description": "Gt Miner.",
+  "modid": "dumb_miner",
+  "name": "Dumb Miner",
+  "description": "Dumb Miner.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",

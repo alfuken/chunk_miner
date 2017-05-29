@@ -5,7 +5,7 @@ Time: 21/05/17 14:15
 Description: Unexpected error
 
 java.lang.NullPointerException: Unexpected error
-	at lime.gtminer.items.GtOreFinder.onItemRightClick(GtOreFinder.java:55)
+	at lime.gtminer.items.DumbScanner.onItemRightClick(GtOreFinder.java:55)
 	at net.minecraft.item.ItemStack.useItemRightClick(ItemStack.java:164)
 	at net.minecraft.client.multiplayer.PlayerControllerMP.sendUseItem(PlayerControllerMP.java:430)
 	at net.minecraft.client.Minecraft.func_147121_ag(Minecraft.java:1557)
@@ -28,7 +28,7 @@ A detailed walkthrough of the error, its code path and all known details is as f
 
 -- Head --
 Stacktrace:
-	at lime.gtminer.items.GtOreFinder.onItemRightClick(GtOreFinder.java:55)
+	at lime.gtminer.items.DumbScanner.onItemRightClick(GtOreFinder.java:55)
 	at net.minecraft.item.ItemStack.useItemRightClick(ItemStack.java:164)
 	at net.minecraft.client.multiplayer.PlayerControllerMP.sendUseItem(PlayerControllerMP.java:430)
 	at net.minecraft.client.Minecraft.func_147121_ag(Minecraft.java:1557)

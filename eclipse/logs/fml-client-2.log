@@ -267,7 +267,7 @@ Details:
 [14:07:59] [Client thread/DEBUG] [FML/]: The mod container lwjgl-platform-2.9.1-natives-osx.jar appears to be missing an mcmod.info file
 [14:07:59] [Client thread/DEBUG] [FML/]: Examining file gtminer-1.7.10-1.jar for potential mods
 [14:07:59] [Client thread/TRACE] [FML/]: Located mcmod.info file in file gtminer-1.7.10-1.jar
-[14:07:59] [Client thread/DEBUG] [FML/]: Identified a mod of type Lcpw/mods/fml/common/Mod; (lime.gtminer.GtMiner) - loading
+[14:07:59] [Client thread/DEBUG] [FML/]: Identified a mod of type Lcpw/mods/fml/common/Mod; (lime.gtminer.DumbMiner) - loading
 [14:07:59] [Client thread/TRACE] [gtminer/]: Parsed dependency info : [] [] []
 [14:08:00] [Client thread/INFO] [FML/]: Forge Mod Loader has identified 4 mods to load
 [14:08:00] [Client thread/TRACE] [FML/]: Received a system property request ''
@@ -584,16 +584,16 @@ Details:
 [14:09:27] [Client thread/DEBUG] [FML/]: The fluid minecraft:water has been selected as the default fluid for water
 [14:09:27] [Client thread/INFO] [FML/]: [Client thread] Client side modded connection established
 [14:09:28] [Client thread/DEBUG] [FML/]: Overriding dimension: using 0
-[14:09:30] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.GtOreFinder:onItemRightClick:75]: 
+[14:09:30] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.DumbScanner:onItemRightClick:75]:
 ===> Scan took 10 milliseconds
-[14:09:31] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.GtOreFinder:onItemRightClick:75]: 
+[14:09:31] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.DumbScanner:onItemRightClick:75]:
 ===> Scan took 4 milliseconds
-[14:09:32] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.GtOreFinder:onItemRightClick:75]: 
+[14:09:32] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.DumbScanner:onItemRightClick:75]:
 ===> Scan took 5 milliseconds
-[14:09:39] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.GtOreFinder:onItemRightClick:75]: 
+[14:09:39] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.DumbScanner:onItemRightClick:75]:
 ===> Scan took 6 milliseconds
-[14:09:44] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.GtOreFinder:onItemRightClick:75]: 
+[14:09:44] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.DumbScanner:onItemRightClick:75]:
 ===> Scan took 5 milliseconds
-[14:09:56] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.GtOreFinder:onItemRightClick:75]: 
+[14:09:56] [Client thread/INFO] [STDOUT/]: [lime.gtminer.items.DumbScanner:onItemRightClick:75]:
 ===> Scan took 6 milliseconds
 [14:09:59] [Server thread/DEBUG] [FML/]: Gathering id map for writing to world save New World

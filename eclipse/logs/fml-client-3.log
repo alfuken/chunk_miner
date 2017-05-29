@@ -267,7 +267,7 @@ Details:
 [14:15:27] [Client thread/DEBUG] [FML/]: The mod container lwjgl-platform-2.9.1-natives-osx.jar appears to be missing an mcmod.info file
 [14:15:27] [Client thread/DEBUG] [FML/]: Examining file gtminer-1.7.10-1.jar for potential mods
 [14:15:27] [Client thread/TRACE] [FML/]: Located mcmod.info file in file gtminer-1.7.10-1.jar
-[14:15:27] [Client thread/DEBUG] [FML/]: Identified a mod of type Lcpw/mods/fml/common/Mod; (lime.gtminer.GtMiner) - loading
+[14:15:27] [Client thread/DEBUG] [FML/]: Identified a mod of type Lcpw/mods/fml/common/Mod; (lime.gtminer.DumbMiner) - loading
 [14:15:27] [Client thread/TRACE] [gtminer/]: Parsed dependency info : [] [] []
 [14:15:27] [Client thread/INFO] [FML/]: Forge Mod Loader has identified 4 mods to load
 [14:15:27] [Client thread/TRACE] [FML/]: Received a system property request ''
@@ -637,7 +637,7 @@ Time: 21/05/17 14:15
 Description: Unexpected error
 
 java.lang.NullPointerException: Unexpected error
-	at lime.gtminer.items.GtOreFinder.onItemRightClick(GtOreFinder.java:55)
+	at lime.gtminer.items.DumbScanner.onItemRightClick(GtOreFinder.java:55)
 	at net.minecraft.item.ItemStack.useItemRightClick(ItemStack.java:164)
 	at net.minecraft.client.multiplayer.PlayerControllerMP.sendUseItem(PlayerControllerMP.java:430)
 	at net.minecraft.client.Minecraft.func_147121_ag(Minecraft.java:1557)
@@ -660,7 +660,7 @@ A detailed walkthrough of the error, its code path and all known details is as f
 
 -- Head --
 Stacktrace:
-	at lime.gtminer.items.GtOreFinder.onItemRightClick(GtOreFinder.java:55)
+	at lime.gtminer.items.DumbScanner.onItemRightClick(GtOreFinder.java:55)
 	at net.minecraft.item.ItemStack.useItemRightClick(ItemStack.java:164)
 	at net.minecraft.client.multiplayer.PlayerControllerMP.sendUseItem(PlayerControllerMP.java:430)
 	at net.minecraft.client.Minecraft.func_147121_ag(Minecraft.java:1557)

@@ -10,7 +10,7 @@
 :apiClasses UP-TO-DATE
 :sourceMainJava
 :compileJavawarning: [options] bootstrap class path not set in conjunction with -source 1.6
-Note: /Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/build/sources/java/lime/gtminer/items/GtOreFinder.java uses unchecked or unsafe operations.
+Note: /Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/build/sources/java/lime/dumb_miner/DumbMinerHelpers.java uses unchecked or unsafe operations.
 Note: Recompile with -Xlint:unchecked for details.
 1 warning
 
@@ -32,4 +32,4 @@ Note: Recompile with -Xlint:unchecked for details.
 
 BUILD SUCCESSFUL
 
-Total time: 10.301 secs
+Total time: 9.3 secs

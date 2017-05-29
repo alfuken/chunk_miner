@@ -7,7 +7,7 @@ Description: Getting block
 java.lang.ArrayIndexOutOfBoundsException: -64
 	at net.minecraft.world.chunk.storage.ExtendedBlockStorage.getBlockByExtId(ExtendedBlockStorage.java:51)
 	at net.minecraft.world.chunk.Chunk.getBlock(Chunk.java:572)
-	at lime.gtminer.items.GtOreFinder.onItemRightClick(GtOreFinder.java:40)
+	at lime.gtminer.items.DumbScanner.onItemRightClick(GtOreFinder.java:40)
 	at net.minecraft.item.ItemStack.useItemRightClick(ItemStack.java:164)
 	at net.minecraft.server.management.ItemInWorldManager.tryUseItem(ItemInWorldManager.java:345)
 	at net.minecraft.network.NetHandlerPlayServer.processPlayerBlockPlacement(NetHandlerPlayServer.java:576)
@@ -34,7 +34,7 @@ Details:
 	Location: World: (-64,0,256), Chunk: (at 0,0,0 in -4,16; contains blocks -64,0,256 to -49,255,271), Region: (-1,0; contains chunks -32,0 to -1,31, blocks -512,0,0 to -1,255,511)
 Stacktrace:
 	at net.minecraft.world.chunk.Chunk.getBlock(Chunk.java:572)
-	at lime.gtminer.items.GtOreFinder.onItemRightClick(GtOreFinder.java:40)
+	at lime.gtminer.items.DumbScanner.onItemRightClick(GtOreFinder.java:40)
 	at net.minecraft.item.ItemStack.useItemRightClick(ItemStack.java:164)
 	at net.minecraft.server.management.ItemInWorldManager.tryUseItem(ItemInWorldManager.java:345)
 	at net.minecraft.network.NetHandlerPlayServer.processPlayerBlockPlacement(NetHandlerPlayServer.java:576)

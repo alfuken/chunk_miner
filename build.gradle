@@ -19,8 +19,8 @@ apply plugin: 'forge'
 apply plugin: 'idea'
 
 version = "1.7.10-1"
-group= "lime.gtminer" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "gtminer"
+group= "lime.dumb_miner" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "dumb_miner"
 
 minecraft {
     version = "1.7.10-10.13.4.1614-1.7.10"

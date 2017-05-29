@@ -6,6 +6,8 @@
     <JAVADOC />
     <SOURCES>
       <root url="jar://$PROJECT_DIR$/libs/industrialcraft-2-2.2.827-experimental-dev.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/industrialcraft-2-2.2.827-experimental-dev.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/industrialcraft-2-2.2.827-experimental-dev.jar!/" />
     </SOURCES>
   </library>
 </component>
