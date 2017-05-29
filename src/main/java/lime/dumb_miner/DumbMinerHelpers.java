@@ -1,5 +1,6 @@
 package lime.dumb_miner;
 
+import cpw.mods.fml.common.Loader;
 import gregtech.api.util.GT_Utility;
 import ic2.api.recipe.IRecipeInput;
 import ic2.core.IC2;
@@ -9,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fluids.FluidStack;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -32,26 +34,47 @@ public class DumbMinerHelpers {
         return false;
     }
 
-    public static String formattedChunkScanReport(World w, EntityPlayer p){
-        Map<String, Integer> ores = scan(w, (int)p.posX, (int)p.posZ, true);
+//    public static String areaScanReportAsString(World w, EntityPlayer p){
+//        return StringUtils.join(areaScanReportAsList(w, p), " - ");
+//    }
+//
+//    public static List<String> areaScanReportAsList(World w, EntityPlayer p){
+//        Map<String, Integer> ores = scan_area(w, (int)p.posX, (int)p.posZ, true, 8);
+//
+//        ArrayList<String> rows = new ArrayList<String>();
+//        rows.add("Resources at (" + (int) p.posX + ":" + (int) p.posZ + ")");
+//        for (Map.Entry<String, Integer> entry : ores.entrySet()) {
+//            rows.add(entry.getValue()+" "+entry.getKey());
+//        }
+//
+//        FluidStack fluid = GT_Utility.getUndergroundOil(w, (int)p.posX, (int)p.posZ);
+//        if (fluid.amount > 0) rows.add(fluid.amount/1000+" "+fluid.getLocalizedName());
+//
+//        return rows;
+//    }
 
-        StringBuilder s = new StringBuilder();
-        s.append("Resources at (").append((int)p.posX).append(":").append((int)p.posZ).append(") – ");
+    public static List<String> chunkScanReportAsList(World w, EntityPlayer p){
+        Map<String, Integer> ores = scan(w, (int)p.posX, (int)p.posZ);
+
+        ArrayList<String> rows = new ArrayList<String>();
+        rows.add("Resources at (" + (int) p.posX + ":" + (int) p.posZ + ")");
         for (Map.Entry<String, Integer> entry : ores.entrySet()) {
-            s.append(entry.getValue()).append(" ").append(entry.getKey()).append("; ");
+            rows.add(entry.getValue()+" "+entry.getKey());
         }
 
-        FluidStack fluid = GT_Utility.getUndergroundOil(w, (int)p.posX, (int)p.posZ);
-        if (fluid.amount > 0) s.append(fluid.amount/1000).append(" ").append(fluid.getLocalizedName());
+        if (Loader.isModLoaded("gregtech")){
+            FluidStack fluid = GT_Utility.getUndergroundOil(w, (int)p.posX, (int)p.posZ);
+            if (fluid.amount > 0) rows.add(fluid.amount/1000+" "+fluid.getLocalizedName());
+        }
 
-        return s.toString();
+        return rows;
+    }
+
+    public static String chunkScanReportAsString(World w, EntityPlayer p){
+        return StringUtils.join(chunkScanReportAsList(w, p), " - ");
     }
 
     public static Map<String, Integer> scan(World w, int wx, int wz) {
-        return scan(w, wx, wz, false);
-    }
-
-    public static Map<String, Integer> scan(World w, int wx, int wz, boolean skipPoor) {
         long startTime = System.currentTimeMillis();
 
         Map<String, Integer> ret = new HashMap();
@@ -64,19 +87,17 @@ public class DumbMinerHelpers {
                     Block block = w.getBlock(x, y, z);
                     int meta = w.getBlockMetadata(x, y, z);
                     if(isValuable(w, x, y, z)) {
-                        Iterator drops = block.getDrops(w, x, y, z, meta, 0).iterator();
 
-                        while(drops.hasNext()) {
-                            ItemStack drop = (ItemStack)drops.next();
+                        for (ItemStack drop : block.getDrops(w, x, y, z, meta, 0)) {
                             String key = drop.getItem().getItemStackDisplayName(drop);
-                            if (skipPoor && (
-                                key.contains(" Dust") ||
-                                key.contains("Chipped ") ||
-                                key.contains("Flawed ") ||
-                                key.contains("Crushed"))
-                            ){} else {
+                            boolean ignore_key = false;
+                            for(String m : Config.ignored_materials){
+                                if (key.contains(m)) ignore_key = true;
+                            }
+
+                            if (!(Config.skip_poor_ores && ignore_key)) {
                                 Integer count = ret.get(key);
-                                if(count == null) count = 0;
+                                if (count == null) count = 0;
                                 count += drop.stackSize;
                                 ret.put(key, count);
                             }

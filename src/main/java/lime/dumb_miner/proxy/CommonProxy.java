@@ -5,41 +5,64 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ic2.core.Ic2Items;
-import lime.dumb_miner.blocks.DumbMinerBlock;
-import lime.dumb_miner.items.DumbScanner;
-import lime.dumb_miner.tiles.DumbMinerTile;
-import net.minecraft.block.Block;
+import lime.dumb_miner.ChunkLoadingCallback;
+import lime.dumb_miner.Config;
+import lime.dumb_miner.DumbMiner;
+import lime.dumb_miner.blocks.ModBlocks;
+import lime.dumb_miner.items.ModItems;
+import lime.dumb_miner.tiles.ModTiles;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.config.Configuration;
+
+import java.io.File;
+
+import static lime.dumb_miner.DumbMiner.config;
+import static lime.dumb_miner.DumbMiner.logger;
 
 public class CommonProxy {
     public void preInit(FMLPreInitializationEvent e) {
-        Item scanner = new DumbScanner();
-        Block minerblock = new DumbMinerBlock();
-        GameRegistry.registerItem(scanner, "dumb_scanner");
-        GameRegistry.registerBlock(minerblock, "dumb_miner_block");
-        GameRegistry.registerTileEntity(DumbMinerTile.class, "dumb_miner_tile");
-        GameRegistry.addRecipe(new ItemStack(scanner),
-            "DS",
-            "SD",
-            'S', Items.stick, 'D', Blocks.dirt
-        );
-        GameRegistry.addRecipe(new ItemStack(Item.getItemFromBlock(minerblock)),
-            "DSD",
-            "SDS",
-            "RBR",
-            'S', Items.stick, 'D', Blocks.dirt, 'R', scanner, 'B', Ic2Items.bronzeBlock
-        );
+        logger = e.getModLog();
+        File directory = e.getModConfigurationDirectory();
+        config = new Configuration(new File(directory.getPath(), "dumb_miner.cfg"));
+        Config.readConfig();
 
+        if (Config.load_chunks){
+            ForgeChunkManager.setForcedChunkLoadingCallback(DumbMiner.INSTANCE, new ChunkLoadingCallback());
+        }
+
+        ModItems.init();
+        ModBlocks.init();
+        ModTiles.init();
     }
 
     public void init(FMLInitializationEvent e) {
-//        MinecraftForge.EVENT_BUS.register(new EnteringChunkEventHandler());
+        GameRegistry.addRecipe(new ItemStack(ModItems.scanner),
+                "DS",
+                "SD",
+                'S', Items.stick, 'D', Blocks.dirt
+        );
+//        GameRegistry.addRecipe(new ItemStack(ModItems.area_scanner),
+//                "RRR",
+//                "RDR",
+//                "RRR",
+//                'D', Blocks.dirt, 'R', ModItems.scanner
+//        );
+        GameRegistry.addRecipe(new ItemStack(ModBlocks.dumb_miner_block),
+                "SRS",
+                "BBB",
+                "DBD",
+                'S', Items.stick, 'D', Blocks.dirt, 'R', ModItems.scanner, 'B', Ic2Items.bronzeBlock
+        );
+
     }
 
     public void postInit(FMLPostInitializationEvent e) {
 //        MinecraftForge.EVENT_BUS.register(new RenderGuiHandler());
+        if (config.hasChanged()) {
+            config.save();
+        }
     }
 }
