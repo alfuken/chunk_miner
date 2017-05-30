@@ -43,11 +43,6 @@ public class DumbMinerBlock extends BlockContainer {
     public IIcon getIcon(int side, int meta) {
         if (side <= 1) return this.icons[side];
         int index = (Direction.facingToDirection[side]-2) & 3;
-//        switch (meta){
-//            case 1: index = Direction.rotateLeft[index];
-//            case 2: index = Direction.rotateOpposite[index];
-//            case 3: index = Direction.rotateRight[index];
-//        }
         if (meta == 1) { index = Direction.rotateLeft[index]; }
         else if (meta == 2) { index = Direction.rotateOpposite[index]; }
         else if (meta == 3) { index = Direction.rotateRight[index]; }

@@ -1,9 +1,11 @@
 package lime.dumb_miner.proxy;
 
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
+import gregtech.api.enums.ItemList;
 import ic2.core.Ic2Items;
 import lime.dumb_miner.ChunkLoadingCallback;
 import lime.dumb_miner.Config;
@@ -13,6 +15,7 @@ import lime.dumb_miner.items.ModItems;
 import lime.dumb_miner.tiles.ModTiles;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.config.Configuration;
@@ -44,17 +47,26 @@ public class CommonProxy {
                 "SD",
                 'S', Items.stick, 'D', Blocks.dirt
         );
+
 //        GameRegistry.addRecipe(new ItemStack(ModItems.area_scanner),
 //                "RRR",
 //                "RDR",
 //                "RRR",
 //                'D', Blocks.dirt, 'R', ModItems.scanner
 //        );
+
+        Item hull;
+        if (Loader.isModLoaded("gregtech")){
+            hull = ItemList.Hull_Bronze.getItem();
+        } else {
+            hull = Ic2Items.machine.getItem();
+        }
+
         GameRegistry.addRecipe(new ItemStack(ModBlocks.dumb_miner_block),
-                "SRS",
-                "BBB",
-                "DBD",
-                'S', Items.stick, 'D', Blocks.dirt, 'R', ModItems.scanner, 'B', Ic2Items.bronzeBlock
+            "DHS",
+            "PPP",
+            "SPD",
+            'S', Items.stick, 'D', Blocks.dirt, 'H', hull, 'P', Ic2Items.platebronze
         );
 
     }

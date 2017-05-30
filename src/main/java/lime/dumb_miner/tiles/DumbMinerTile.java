@@ -35,7 +35,9 @@ public class DumbMinerTile extends TileEntity {
     }
 
     public void updateEntity(){
-        if (this.worldObj.isRemote || !redstone) return;
+        if (this.worldObj.isRemote) return;
+        if (Config.require_redstone && !redstone) return;
+
         if (ticker >= Config.seconds_to_mine * 20){
             ticker = 0;
             if (this.work()) this.markDirty();
@@ -56,11 +58,11 @@ public class DumbMinerTile extends TileEntity {
     }
 
     private int mineFromY(){
-        return this.worldObj.getChunkFromBlockCoords(this.xCoord, this.zCoord).getTopFilledSegment() + 16;
+        return Config.levels_to_mine == 0 ? this.worldObj.getChunkFromBlockCoords(this.xCoord, this.zCoord).getTopFilledSegment() + 16 : this.yCoord - 1;
     }
 
     private int mineToY(){
-        return Config.mine_to_y;
+        return Config.levels_to_mine == 0 ? 0 : this.yCoord - Config.levels_to_mine;
     }
 
     private boolean work() {
@@ -71,8 +73,13 @@ public class DumbMinerTile extends TileEntity {
         if (currY == -1) currY = mineFromY();
 
         for (int y = currY; y > mineToY(); y--) {
-            if (y == mineToY()) getWorldObj().setBlockToAir(this.xCoord, this.yCoord, this.zCoord);
-//            if (y == mineToY()) setRedstone(false);
+            if (y == mineToY()) {
+                if (Config.selfdestruct) {
+                    getWorldObj().setBlockToAir(this.xCoord, this.yCoord, this.zCoord);
+                } else {
+                    setRedstone(false);
+                }
+            }
 
             for (int x = c.xPosition * 16; x < c.xPosition * 16 + 16; x++) {
                 for (int z = c.zPosition * 16; z < c.zPosition * 16 + 16; z++) {
@@ -100,11 +107,11 @@ public class DumbMinerTile extends TileEntity {
 
         Block block = this.worldObj.getBlock(this.currX, this.currY, this.currZ);
 
-        if (block instanceof BlockAir || block instanceof IFluidBlock || block instanceof BlockStaticLiquid || block instanceof BlockDynamicLiquid) return false;
+        if (block == null || block instanceof BlockAir || block instanceof IFluidBlock || block instanceof BlockStaticLiquid || block instanceof BlockDynamicLiquid) return false;
 
         if (block.getBlockHardness(this.worldObj, this.currX, this.currY, this.currZ) < 0.0F) return false;
 
-//        if (block.hasTileEntity(this.worldObj.getBlockMetadata(x,y,z)))
+//      if (block.hasTileEntity(this.worldObj.getBlockMetadata(x,y,z)))
         return DumbMinerHelpers.isValuable(this.worldObj, this.currX, this.currY, this.currZ);
     }
 
@@ -141,7 +148,7 @@ public class DumbMinerTile extends TileEntity {
             EntityItem entityItem = new EntityItem(world, (double)x + dx, (double)y + dy, (double)z + dz, itemStack.copy());
             entityItem.delayBeforeCanPickup = 10;
             entityItem.motionX = 0;
-            entityItem.motionY = 0.1;
+            entityItem.motionY = 0.15;
             entityItem.motionZ = 0;
             world.spawnEntityInWorld(entityItem);
         }
