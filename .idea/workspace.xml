@@ -29,8 +29,8 @@
       <file leaf-file-name="DumbMinerTile.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/lime/dumb_miner/tiles/DumbMinerTile.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-175">
-              <caret line="52" column="46" lean-forward="true" selection-start-line="52" selection-start-column="46" selection-end-line="52" selection-end-column="46" />
+            <state relative-caret-position="401">
+              <caret line="112" column="0" lean-forward="false" selection-start-line="112" selection-start-column="0" selection-end-line="112" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#1075#1076#0" expanded="true" />
@@ -40,11 +40,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Config.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Config.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/lime/dumb_miner/Config.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+            <state relative-caret-position="615">
+              <caret line="41" column="82" lean-forward="true" selection-start-line="41" selection-start-column="82" selection-end-line="41" selection-end-column="82" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -76,16 +76,18 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DumbMinerHelpers.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="DumbMinerHelpers.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/lime/dumb_miner/DumbMinerHelpers.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-551">
-              <caret line="50" column="50" lean-forward="false" selection-start-line="50" selection-start-column="26" selection-end-line="50" selection-end-column="50" />
+            <state relative-caret-position="78">
+              <caret line="53" column="65" lean-forward="true" selection-start-line="53" selection-start-column="65" selection-end-line="53" selection-end-column="65" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1631#1632#0" expanded="true" />
-                <element signature="e#1698#1699#0" expanded="true" />
-                <element signature="e#2723#2731#0" expanded="true" />
+                <element signature="e#2039#2040#0" expanded="true" />
+                <element signature="e#2106#2107#0" expanded="true" />
+                <element signature="e#2306#2314#0" expanded="true" />
+                <element signature="e#3696#3697#0" expanded="true" />
+                <element signature="e#3737#3738#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -133,6 +135,7 @@
       <find>facing</find>
       <find>directionToFacing</find>
       <find>machine</find>
+      <find>new Block(</find>
     </findStrings>
   </component>
   <component name="GradleLocalSettings">
@@ -655,11 +658,11 @@
         <option value="$PROJECT_DIR$/src/main/java/lime/dumb_miner/items/AreaScanner.java" />
         <option value="$PROJECT_DIR$/src/main/java/lime/dumb_miner/DumbMiner.java" />
         <option value="$PROJECT_DIR$/src/main/java/lime/dumb_miner/items/DumbScanner.java" />
-        <option value="$PROJECT_DIR$/src/main/java/lime/dumb_miner/tiles/DumbMinerTile.java" />
-        <option value="$PROJECT_DIR$/src/main/java/lime/dumb_miner/Config.java" />
         <option value="$PROJECT_DIR$/src/main/java/lime/dumb_miner/proxy/CommonProxy.java" />
         <option value="$PROJECT_DIR$/src/main/java/lime/dumb_miner/blocks/DumbMinerBlock.java" />
+        <option value="$PROJECT_DIR$/src/main/java/lime/dumb_miner/tiles/DumbMinerTile.java" />
         <option value="$PROJECT_DIR$/src/main/java/lime/dumb_miner/DumbMinerHelpers.java" />
+        <option value="$PROJECT_DIR$/src/main/java/lime/dumb_miner/Config.java" />
       </list>
     </option>
   </component>
@@ -955,7 +958,7 @@
     <property name="project.structure.last.edited" value="Libraries" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.3770115" />
-    <property name="SearchEverywhereHistoryKey" value="isValuable&#9;PSI&#9;JAVA://ic2.core.item.tool.ItemScanner#isValuable&#10;hull&#9;PSI&#9;JAVA://gregtech.api.enums.ItemList#Hull_Bronze&#10;conf&#9;FILE&#9;file:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/src/main/java/lime/dumb_miner/Config.java&#10;dumtile&#9;FILE&#9;file:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/src/main/java/lime/dumb_miner/tiles/DumbMinerTile.java&#10;addValuableOre&#9;PSI&#9;JAVA://gregtech.api.util.GT_ModHandler#addValuableOre&#10;valuable&#9;PSI&#9;JAVA://gregtech.api.util.GT_ModHandler#addValuableOre&#10;getChunk&#9;PSI&#9;JAVA://net.minecraft.world.World#getChunkFromChunkCoords&#10;directionToFacing&#9;PSI&#9;JAVA://net.minecraft.util.Direction#directionToFacing&#10;facing&#9;PSI&#9;JAVA://net.minecraft.util.Direction#directionToFacing&#10;rotat&#9;PSI&#9;JAVA://net.minecraft.block.BlockRotatedPillar&#10;side&#9;FILE&#9;file:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/libs/GT5-Unofficial-unstable/src/main/java/gregtech/api/objects/GT_SidedTexture.java&#10;EnumFacing&#9;PSI&#9;JAVA://net.minecraft.util.EnumFacing&#10;lang&#9;FILE&#9;file:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/src/main/resources/assets/dumb_miner/lang/en_US.lang&#10;bronze&#9;PSI&#9;JAVA://ic2.core.Ic2Items#bronzeBlock&#10;blockBronze&#9;PSI&#9;JAVA://gregtech.api.enums.Textures.BlockIcons#BLOCK_BRONZE&#10;pickax&#9;PSI&#9;JAVA://gregtech.common.tools.GT_Tool_Pickaxe&#10;itemsn&#9;PSI&#9;JAVA://net.minecraft.item.ItemSnowball&#10;item&#9;FILE&#9;jar:///Users/Bohdan/.gradle/caches/minecraft/net/minecraftforge/forge/1.7.10-10.13.4.1614-1.7.10/forgeSrc-1.7.10-10.13.4.1614-1.7.10-sources.jar!/net/minecraft/item/ItemFood.java&#10;chipped&#9;PSI&#9;JAVA://gregtech.api.enums.OrePrefixes#gemChipped&#10;sapphire&#9;PSI&#9;JAVA://gregtech.api.enums.Materials#Sapphire&#10;redstone lamp&#9;PSI&#9;JAVA://net.minecraft.init.Blocks#redstone_lamp&#10;guiscanner&#9;FILE&#9;jar:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/libs/industrialcraft-2-2.2.827-experimental-dev.jar!/ic2/core/item/tool/GuiToolScanner.class&#10;handheld&#9;PSI&#9;JAVA://ic2.core.item.tool.HandHeldInventory&#10;itemscanner&#9;PSI&#9;JAVA://ic2.core.item.tool.ItemScannerAdv&#10;Scanner&#9;PSI&#9;JAVA://ic2.core.item.tool.ItemScanner&#10;ovScanner&#9;PSI&#9;JAVA://ic2.core.Ic2Items#ovScanner&#10;advminer&#9;FILE&#9;jar:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/libs/industrialcraft-2-2.2.827-experimental-dev.jar!/ic2/core/block/machine/tileentity/TileEntityAdvMiner.class&#10;gtblockore&#9;PSI&#9;JAVA://gregtech.common.blocks.GT_Block_Ores&#10;gtoreblock&#9;PSI&#9;JAVA://gregtech.api.world.GT_Worldgen_Ore_SingleBlock&#10;furna&#9;PSI&#9;JAVA://net.minecraft.block.BlockFurnace&#10;advseis&#9;FILE&#9;file:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/libs/GT5-Unofficial-unstable/src/main/java/gregtech/common/tileentities/machines/basic/GT_MetaTileEntity_AdvSeismicProspector.java&#10;oredict&#9;PSI&#9;JAVA://net.minecraftforge.oredict.OreDictionary&#10;block&#9;PSI&#9;JAVA://net.minecraft.block.Block&#10;ironore&#9;PSI&#9;JAVA://net.minecraft.init.Blocks#iron_ore" />
+    <property name="SearchEverywhereHistoryKey" value="bedrock&#9;PSI&#9;JAVA://net.minecraft.init.Blocks#bedrock&#10;isValuable&#9;PSI&#9;JAVA://ic2.core.item.tool.ItemScanner#isValuable&#10;hull&#9;PSI&#9;JAVA://gregtech.api.enums.ItemList#Hull_Bronze&#10;conf&#9;FILE&#9;file:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/src/main/java/lime/dumb_miner/Config.java&#10;dumtile&#9;FILE&#9;file:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/src/main/java/lime/dumb_miner/tiles/DumbMinerTile.java&#10;addValuableOre&#9;PSI&#9;JAVA://gregtech.api.util.GT_ModHandler#addValuableOre&#10;valuable&#9;PSI&#9;JAVA://gregtech.api.util.GT_ModHandler#addValuableOre&#10;getChunk&#9;PSI&#9;JAVA://net.minecraft.world.World#getChunkFromChunkCoords&#10;directionToFacing&#9;PSI&#9;JAVA://net.minecraft.util.Direction#directionToFacing&#10;facing&#9;PSI&#9;JAVA://net.minecraft.util.Direction#directionToFacing&#10;rotat&#9;PSI&#9;JAVA://net.minecraft.block.BlockRotatedPillar&#10;side&#9;FILE&#9;file:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/libs/GT5-Unofficial-unstable/src/main/java/gregtech/api/objects/GT_SidedTexture.java&#10;EnumFacing&#9;PSI&#9;JAVA://net.minecraft.util.EnumFacing&#10;lang&#9;FILE&#9;file:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/src/main/resources/assets/dumb_miner/lang/en_US.lang&#10;bronze&#9;PSI&#9;JAVA://ic2.core.Ic2Items#bronzeBlock&#10;blockBronze&#9;PSI&#9;JAVA://gregtech.api.enums.Textures.BlockIcons#BLOCK_BRONZE&#10;pickax&#9;PSI&#9;JAVA://gregtech.common.tools.GT_Tool_Pickaxe&#10;itemsn&#9;PSI&#9;JAVA://net.minecraft.item.ItemSnowball&#10;item&#9;FILE&#9;jar:///Users/Bohdan/.gradle/caches/minecraft/net/minecraftforge/forge/1.7.10-10.13.4.1614-1.7.10/forgeSrc-1.7.10-10.13.4.1614-1.7.10-sources.jar!/net/minecraft/item/ItemFood.java&#10;chipped&#9;PSI&#9;JAVA://gregtech.api.enums.OrePrefixes#gemChipped&#10;sapphire&#9;PSI&#9;JAVA://gregtech.api.enums.Materials#Sapphire&#10;redstone lamp&#9;PSI&#9;JAVA://net.minecraft.init.Blocks#redstone_lamp&#10;guiscanner&#9;FILE&#9;jar:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/libs/industrialcraft-2-2.2.827-experimental-dev.jar!/ic2/core/item/tool/GuiToolScanner.class&#10;handheld&#9;PSI&#9;JAVA://ic2.core.item.tool.HandHeldInventory&#10;itemscanner&#9;PSI&#9;JAVA://ic2.core.item.tool.ItemScannerAdv&#10;Scanner&#9;PSI&#9;JAVA://ic2.core.item.tool.ItemScanner&#10;ovScanner&#9;PSI&#9;JAVA://ic2.core.Ic2Items#ovScanner&#10;advminer&#9;FILE&#9;jar:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/libs/industrialcraft-2-2.2.827-experimental-dev.jar!/ic2/core/block/machine/tileentity/TileEntityAdvMiner.class&#10;gtblockore&#9;PSI&#9;JAVA://gregtech.common.blocks.GT_Block_Ores&#10;gtoreblock&#9;PSI&#9;JAVA://gregtech.api.world.GT_Worldgen_Ore_SingleBlock&#10;furna&#9;PSI&#9;JAVA://net.minecraft.block.BlockFurnace&#10;advseis&#9;FILE&#9;file:///Users/Bohdan/Library/Mobile Documents/com~apple~CloudDocs/modlab/gtminer/1.7.10/libs/GT5-Unofficial-unstable/src/main/java/gregtech/common/tileentities/machines/basic/GT_MetaTileEntity_AdvSeismicProspector.java&#10;oredict&#9;PSI&#9;JAVA://net.minecraftforge.oredict.OreDictionary&#10;block&#9;PSI&#9;JAVA://net.minecraft.block.Block&#10;ironore&#9;PSI&#9;JAVA://net.minecraft.init.Blocks#iron_ore" />
     <property name="settings.editor.selected.configurable" value="reference.settings.project.maven.repository.indices" />
   </component>
   <component name="RunDashboard">
@@ -1323,6 +1326,9 @@
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
     </layout-to-restore>
   </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.gitignore" />
+  </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
@@ -1337,38 +1343,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$USER_HOME$/.gradle/caches/minecraft/net/minecraftforge/forge/1.7.10-10.13.4.1614-1.7.10/forgeSrc-1.7.10-10.13.4.1614-1.7.10-sources.jar!/net/minecraft/block/Block.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="1269" column="37" lean-forward="true" selection-start-line="1269" selection-start-column="37" selection-end-line="1269" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/minecraft/net/minecraftforge/forge/1.7.10-10.13.4.1614-1.7.10/forgeSrc-1.7.10-10.13.4.1614-1.7.10-sources.jar!/net/minecraft/block/BlockContainer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="6" column="22" lean-forward="false" selection-start-line="6" selection-start-column="22" selection-end-line="6" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/minecraft/net/minecraftforge/forge/1.7.10-10.13.4.1614-1.7.10/forgeSrc-1.7.10-10.13.4.1614-1.7.10-sources.jar!/net/minecraft/util/Facing.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" column="1" lean-forward="true" selection-start-line="14" selection-start-column="1" selection-end-line="14" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/libs/GT5-Unofficial-unstable/src/main/java/gregtech/api/objects/GT_SidedTexture.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-594">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/.gradle/caches/minecraft/net/minecraftforge/forge/1.7.10-10.13.4.1614-1.7.10/forgeSrc-1.7.10-10.13.4.1614-1.7.10-sources.jar!/net/minecraft/util/EnumFacing.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="104">
@@ -1497,14 +1471,6 @@
           <folding>
             <element signature="imports" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$USER_HOME$/.gradle/caches/minecraft/net/minecraftforge/forge/1.7.10-10.13.4.1614-1.7.10/forgeSrc-1.7.10-10.13.4.1614-1.7.10-sources.jar!/net/minecraftforge/common/config/Configuration.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="259">
-          <caret line="1565" column="20" lean-forward="false" selection-start-line="1565" selection-start-column="20" selection-end-line="1565" selection-end-column="20" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1685,38 +1651,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/lime/dumb_miner/tiles/DumbMinerTile.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-175">
-          <caret line="52" column="46" lean-forward="true" selection-start-line="52" selection-start-column="46" selection-end-line="52" selection-end-column="46" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1075#1076#0" expanded="true" />
-            <element signature="e#1112#1113#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/lime/dumb_miner/Config.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/lime/dumb_miner/blocks/DumbMinerBlock.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="733">
-          <caret line="56" column="104" lean-forward="true" selection-start-line="56" selection-start-column="104" selection-end-line="56" selection-end-column="104" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$USER_HOME$/.gradle/caches/minecraft/net/minecraftforge/forge/1.7.10-10.13.4.1614-1.7.10/forgeSrc-1.7.10-10.13.4.1614-1.7.10-sources.jar!/net/minecraft/item/Item.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
@@ -1730,10 +1664,10 @@
         <state relative-caret-position="251">
           <caret line="119" column="13" lean-forward="false" selection-start-line="119" selection-start-column="13" selection-end-line="119" selection-end-column="13" />
           <folding>
-            <element signature="e#3897#3898#0" expanded="true" />
-            <element signature="e#3970#3971#0" expanded="true" />
-            <element signature="e#14559#14560#0" expanded="true" />
-            <element signature="e#14626#14627#0" expanded="true" />
+            <element signature="e#3897#3898#0" expanded="false" />
+            <element signature="e#3970#3971#0" expanded="false" />
+            <element signature="e#14559#14560#0" expanded="false" />
+            <element signature="e#14626#14627#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1765,6 +1699,22 @@
         </state>
       </provider>
     </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/src.zip!/java/util/regex/Pattern.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="259">
+          <caret line="768" column="19" lean-forward="false" selection-start-line="768" selection-start-column="19" selection-end-line="768" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/minecraft/net/minecraftforge/forge/1.7.10-10.13.4.1614-1.7.10/forgeSrc-1.7.10-10.13.4.1614-1.7.10-sources.jar!/net/minecraftforge/common/config/Configuration.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-48">
+          <caret line="1512" column="113" lean-forward="true" selection-start-line="1512" selection-start-column="113" selection-end-line="1512" selection-end-column="113" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/lime/dumb_miner/proxy/CommonProxy.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1020">
@@ -1775,15 +1725,73 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/lime/dumb_miner/DumbMinerHelpers.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/lime/dumb_miner/blocks/DumbMinerBlock.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-551">
-          <caret line="50" column="50" lean-forward="false" selection-start-line="50" selection-start-column="26" selection-end-line="50" selection-end-column="50" />
+        <state relative-caret-position="733">
+          <caret line="56" column="104" lean-forward="true" selection-start-line="56" selection-start-column="104" selection-end-line="56" selection-end-column="104" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#1631#1632#0" expanded="true" />
-            <element signature="e#1698#1699#0" expanded="true" />
-            <element signature="e#2723#2731#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/lime/dumb_miner/tiles/DumbMinerTile.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="401">
+          <caret line="112" column="0" lean-forward="false" selection-start-line="112" selection-start-column="0" selection-end-line="112" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1075#1076#0" expanded="true" />
+            <element signature="e#1112#1113#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/minecraft/net/minecraftforge/forge/1.7.10-10.13.4.1614-1.7.10/forgeSrc-1.7.10-10.13.4.1614-1.7.10-sources.jar!/net/minecraft/block/Block.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="242">
+          <caret line="416" column="62" lean-forward="false" selection-start-line="416" selection-start-column="52" selection-end-line="416" selection-end-column="62" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$USER_HOME$/.gradle/caches/minecraft/net/minecraftforge/forge/1.7.10-10.13.4.1614-1.7.10/forgeSrc-1.7.10-10.13.4.1614-1.7.10-sources.jar!/net/minecraft/init/Blocks.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="40" column="63" lean-forward="true" selection-start-line="40" selection-start-column="63" selection-end-line="40" selection-end-column="63" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/lime/dumb_miner/DumbMinerHelpers.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="78">
+          <caret line="53" column="65" lean-forward="true" selection-start-line="53" selection-start-column="65" selection-end-line="53" selection-end-column="65" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#2039#2040#0" expanded="true" />
+            <element signature="e#2106#2107#0" expanded="true" />
+            <element signature="e#2306#2314#0" expanded="true" />
+            <element signature="e#3696#3697#0" expanded="true" />
+            <element signature="e#3737#3738#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="0" lean-forward="true" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/lime/dumb_miner/Config.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="615">
+          <caret line="41" column="82" lean-forward="true" selection-start-line="41" selection-start-column="82" selection-end-line="41" selection-end-column="82" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>

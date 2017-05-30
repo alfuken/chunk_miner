@@ -111,8 +111,7 @@ public class DumbMinerTile extends TileEntity {
 
         if (block.getBlockHardness(this.worldObj, this.currX, this.currY, this.currZ) < 0.0F) return false;
 
-//      if (block.hasTileEntity(this.worldObj.getBlockMetadata(x,y,z)))
-        return DumbMinerHelpers.isValuable(this.worldObj, this.currX, this.currY, this.currZ);
+        return DumbMinerHelpers.shouldMine(this.worldObj, this.currX, this.currY, this.currZ, block);
     }
 
     private static void distributeDrop(TileEntity source, List<ItemStack> itemStacks) {
