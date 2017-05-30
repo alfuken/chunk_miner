@@ -1,7 +1,6 @@
-package lime.dumb_miner;
+package lime.chunk_miner.gui;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import lime.dumb_miner.gui.ChunkOreDataGui;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 

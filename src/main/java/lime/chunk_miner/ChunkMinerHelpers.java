@@ -1,4 +1,4 @@
-package lime.dumb_miner;
+package lime.chunk_miner;
 
 import cpw.mods.fml.common.Loader;
 import gregtech.api.util.GT_Utility;
@@ -16,24 +16,26 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
-public class DumbMinerHelpers {
+public class ChunkMinerHelpers {
 
     public static boolean isGtChunk(int x, int z){
         return ((x / 16 - 1) % 3 == 0) && ((z / 16 - 1) % 3 == 0);
     }
 
-    public static boolean shouldMine(World w, int x, int y, int z) {
-        return shouldMine(w, x, y, z, w.getBlock(x, y, z));
-    }
+    public static boolean shouldMine(World w, int x, int y, int z){
+        if (y <= 0 || y >= 255) return false;
 
-    public static boolean shouldMine(World w, int x, int y, int z, Block block){
-        if (Config.scan_mode == "optimistic"){
+        Block block = w.getBlock(x, y, z);
+
+        if (block.getBlockHardness(w, x, y, z) < 0.0F) return false;
+
+        if (Config.scan_mode.equals("optimistic")){
             return (potentiallyValuableBlock(block));
-        } else if (Config.scan_mode == "classic") {
+        } else if (Config.scan_mode.equals("classic")) {
             if (trashBlock(block)) return false;
             return (isValuable(new ItemStack(block, 1, w.getBlockMetadata(x, y, z))));
         } else {
-            return true;
+            return (!trashBlock(block));
         }
     }
 
@@ -84,7 +86,7 @@ public class DumbMinerHelpers {
         return StringUtils.join(chunkScanReportAsList(w, p), " - ");
     }
 
-    private static boolean trashBlock(Block block){
+    public static boolean trashBlock(Block block){
         return (block == null
              || block instanceof BlockStone
              || block instanceof BlockAir
@@ -119,10 +121,10 @@ public class DumbMinerHelpers {
                 for (int z = (c.zPosition * 16)-(16 * (radius - 1)); z < c.zPosition * 16 + (16 * radius); z++) {
                     Block block = w.getBlock(x, y, z);
 
-                    if (Config.scan_mode == "optimistic"){
+                    if (Config.scan_mode.equals("optimistic")){
                         if (!potentiallyValuableBlock(block)) continue;
                         meta = w.getBlockMetadata(x, y, z);
-                    } else if (Config.scan_mode == "classic") {
+                    } else if (Config.scan_mode.equals("classic")) {
                         if (trashBlock(block)) continue;
                         meta = w.getBlockMetadata(x, y, z);
                         if (!isValuable(new ItemStack(block, 1, meta))) continue;

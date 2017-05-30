@@ -1,12 +1,9 @@
-package lime.dumb_miner.tiles;
+package lime.chunk_miner.tiles;
 
-import lime.dumb_miner.Config;
-import lime.dumb_miner.DumbMiner;
-import lime.dumb_miner.DumbMinerHelpers;
+import lime.chunk_miner.ChunkMiner;
+import lime.chunk_miner.ChunkMinerHelpers;
+import lime.chunk_miner.Config;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockAir;
-import net.minecraft.block.BlockDynamicLiquid;
-import net.minecraft.block.BlockStaticLiquid;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -14,14 +11,13 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.fluids.IFluidBlock;
 
 import java.util.Iterator;
 import java.util.List;
 
 import static ic2.core.util.StackUtil.distribute;
 
-public class DumbMinerTile extends TileEntity {
+public class ChunkMinerTile extends TileEntity {
     private int work_progress = 0;
     private int ticker = 0;
     private int currX = -1;
@@ -101,17 +97,8 @@ public class DumbMinerTile extends TileEntity {
         return true;
     }
 
-    private boolean shouldMine()
-    {
-        if(currY <= 0 || currY >= 255) return false;
-
-        Block block = this.worldObj.getBlock(this.currX, this.currY, this.currZ);
-
-        if (block == null || block instanceof BlockAir || block instanceof IFluidBlock || block instanceof BlockStaticLiquid || block instanceof BlockDynamicLiquid) return false;
-
-        if (block.getBlockHardness(this.worldObj, this.currX, this.currY, this.currZ) < 0.0F) return false;
-
-        return DumbMinerHelpers.shouldMine(this.worldObj, this.currX, this.currY, this.currZ, block);
+    private boolean shouldMine() {
+        return ChunkMinerHelpers.shouldMine(this.worldObj, this.currX, this.currY, this.currZ);
     }
 
     private static void distributeDrop(TileEntity source, List<ItemStack> itemStacks) {
@@ -158,7 +145,7 @@ public class DumbMinerTile extends TileEntity {
     public void validate() {
         super.validate();
         if (Config.load_chunks && (!this.worldObj.isRemote) && (this.chunkTicket == null)) {
-            ForgeChunkManager.Ticket ticket = ForgeChunkManager.requestTicket(DumbMiner.INSTANCE, this.worldObj, ForgeChunkManager.Type.NORMAL);
+            ForgeChunkManager.Ticket ticket = ForgeChunkManager.requestTicket(ChunkMiner.INSTANCE, this.worldObj, ForgeChunkManager.Type.NORMAL);
             if (ticket != null) {
                 forceChunkLoading(ticket);
             }

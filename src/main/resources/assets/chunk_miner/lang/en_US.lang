@@ -1,0 +1,3 @@
+item.chunk_miner.chunk_scanner.name=Chunk scanner
+tile.chunk_miner.chunk_miner_block.name=Chunk miner
+itemGroup.ChunkMiner=Chunk Miner

@@ -1,10 +1,10 @@
-package lime.dumb_miner;
+package lime.chunk_miner;
 
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.Level;
 
 public class Config {
-    private static final String CS = "scanner";
+    private static final String CS = "chunk_scanner";
     private static final String CM = "miner";
 //  public static int recipe_level           = 2;
     public static int work_to_mine           = 10;
@@ -19,14 +19,14 @@ public class Config {
     public static String  scan_mode          = "optimistic";
 
     public static void readConfig() {
-        Configuration cfg = DumbMiner.config;
+        Configuration cfg = ChunkMiner.config;
         try {
             cfg.load();
 
             cfg.addCustomCategoryComment(CS, "Scanner configuration");
             ignored_materials = cfg.getStringList("Don't show these materials in scan report", CS, ignored_materials, "List of substrings to ignore when 'Don't show poor ores' is set to 'true'. By default it ignores poor ores and cheap gems. Quarry still mines them though!");
             skip_poor_ores    = cfg.getBoolean("Don't show poor ores in scan report",          CS, skip_poor_ores,    "Don't show poor ores and cheap gems in scan report.");
-            inform_gt_chunks  = cfg.getBoolean("Inform about GT Vein chunk",                   CS, inform_gt_chunks,  "If enabled, scanner will notify player if he is in the chunk where GT Vein core is generated (works only if Gregtech is installed).");
+            inform_gt_chunks  = cfg.getBoolean("Inform about GT Vein chunk",                   CS, inform_gt_chunks,  "If enabled, chunk_scanner will notify player if he is in the chunk where GT Vein core is generated (works only if Gregtech is installed).");
             scan_mode         = cfg.getString("Scan mode",                                     CS, scan_mode,         "Ore scanning mode. Optimistic is faster: considers valuable all blocks who's name contains substring 'ore'. Classic is slower: uses the same mechanics as IC2 Ore Scanner.", new String[]{"optimistic", "classic"});
 
             cfg.addCustomCategoryComment(CM, "Miner configuration");
@@ -39,7 +39,7 @@ public class Config {
 //          recipe_level      = cfg.getInt("Miner recipe difficulty level",                    CM, recipe_level,     1, 6, "'Difficulty' of the miner recipe. 1 - 4x Bronze ingots, 2 - 4x Bronze blocks, 3 - 4x Iron i., 4 - 4x Iron b., 5 - 4x Steel i., 6 - 4x Steel b.");
 
         } catch (Exception e1) {
-            DumbMiner.logger.log(Level.ERROR, "Problem loading config file!", e1);
+            ChunkMiner.logger.log(Level.ERROR, "Problem loading config file!", e1);
         } finally {
             if (cfg.hasChanged()) {
                 cfg.save();

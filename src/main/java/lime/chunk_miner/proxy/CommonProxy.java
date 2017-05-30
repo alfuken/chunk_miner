@@ -1,4 +1,4 @@
-package lime.dumb_miner.proxy;
+package lime.chunk_miner.proxy;
 
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -7,12 +7,12 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import gregtech.api.enums.ItemList;
 import ic2.core.Ic2Items;
-import lime.dumb_miner.ChunkLoadingCallback;
-import lime.dumb_miner.Config;
-import lime.dumb_miner.DumbMiner;
-import lime.dumb_miner.blocks.ModBlocks;
-import lime.dumb_miner.items.ModItems;
-import lime.dumb_miner.tiles.ModTiles;
+import lime.chunk_miner.ChunkLoadingCallback;
+import lime.chunk_miner.Config;
+import lime.chunk_miner.ChunkMiner;
+import lime.chunk_miner.blocks.ModBlocks;
+import lime.chunk_miner.items.ModItems;
+import lime.chunk_miner.tiles.ModTiles;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -22,8 +22,8 @@ import net.minecraftforge.common.config.Configuration;
 
 import java.io.File;
 
-import static lime.dumb_miner.DumbMiner.config;
-import static lime.dumb_miner.DumbMiner.logger;
+import static lime.chunk_miner.ChunkMiner.config;
+import static lime.chunk_miner.ChunkMiner.logger;
 
 public class CommonProxy {
     public void preInit(FMLPreInitializationEvent e) {
@@ -33,7 +33,7 @@ public class CommonProxy {
         Config.readConfig();
 
         if (Config.load_chunks){
-            ForgeChunkManager.setForcedChunkLoadingCallback(DumbMiner.INSTANCE, new ChunkLoadingCallback());
+            ForgeChunkManager.setForcedChunkLoadingCallback(ChunkMiner.INSTANCE, new ChunkLoadingCallback());
         }
 
         ModItems.init();
@@ -42,7 +42,7 @@ public class CommonProxy {
     }
 
     public void init(FMLInitializationEvent e) {
-        GameRegistry.addRecipe(new ItemStack(ModItems.scanner),
+        GameRegistry.addRecipe(new ItemStack(ModItems.chunk_scanner),
                 "DS",
                 "SD",
                 'S', Items.stick, 'D', Blocks.dirt
@@ -52,7 +52,7 @@ public class CommonProxy {
 //                "RRR",
 //                "RDR",
 //                "RRR",
-//                'D', Blocks.dirt, 'R', ModItems.scanner
+//                'D', Blocks.dirt, 'R', ModItems.chunk_scanner
 //        );
 
         Item hull;

@@ -1,6 +1,6 @@
-package lime.dumb_miner.items;
+package lime.chunk_miner.items;
 
-import lime.dumb_miner.DumbMiner;
+import lime.chunk_miner.ChunkMiner;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -8,9 +8,9 @@ import net.minecraft.world.World;
 
 public class AreaScanner extends Item {
     public AreaScanner() {
-        setCreativeTab(DumbMiner.ctab);
-        setUnlocalizedName(DumbMiner.MODID + "_area_scanner");
-        setTextureName(DumbMiner.MODID + "_area_scanner");
+        setCreativeTab(ChunkMiner.ctab);
+        setUnlocalizedName(ChunkMiner.MODID + ".area_scanner");
+        setTextureName(ChunkMiner.MODID + ".area_scanner");
     }
 
     public ItemStack onItemRightClick(ItemStack itemStack, World w, EntityPlayer p) {

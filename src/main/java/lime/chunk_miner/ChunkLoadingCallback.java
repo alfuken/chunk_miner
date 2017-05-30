@@ -1,6 +1,6 @@
-package lime.dumb_miner;
+package lime.chunk_miner;
 
-import lime.dumb_miner.tiles.DumbMinerTile;
+import lime.chunk_miner.tiles.ChunkMinerTile;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -18,8 +18,8 @@ public class ChunkLoadingCallback implements ForgeChunkManager.LoadingCallback
             int y = ticket.getModData().getInteger("y");
             int z = ticket.getModData().getInteger("z");
             TileEntity tile = world.getTileEntity(x, y, z);
-            if (tile instanceof DumbMinerTile) {
-                ((DumbMinerTile) tile).forceChunkLoading(ticket);
+            if (tile instanceof ChunkMinerTile) {
+                ((ChunkMinerTile) tile).forceChunkLoading(ticket);
             }
         }
     }

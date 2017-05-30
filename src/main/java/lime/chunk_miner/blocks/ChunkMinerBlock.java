@@ -1,7 +1,7 @@
-package lime.dumb_miner.blocks;
+package lime.chunk_miner.blocks;
 
-import lime.dumb_miner.DumbMiner;
-import lime.dumb_miner.tiles.DumbMinerTile;
+import lime.chunk_miner.ChunkMiner;
+import lime.chunk_miner.tiles.ChunkMinerTile;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -17,12 +17,12 @@ import net.minecraft.world.World;
 
 import java.util.Random;
 
-public class DumbMinerBlock extends BlockContainer {
-    public DumbMinerBlock(){
+public class ChunkMinerBlock extends BlockContainer {
+    public ChunkMinerBlock(){
         super(Material.iron);
-        setCreativeTab(DumbMiner.ctab);
-        setBlockName(DumbMiner.MODID + "_" + "dumb_miner_block");
-        setBlockTextureName(DumbMiner.MODID + "_" + "dumb_miner_block");
+        setCreativeTab(ChunkMiner.ctab);
+        setBlockName(ChunkMiner.MODID + ".chunk_miner_block");
+        setBlockTextureName(ChunkMiner.MODID + ".chunk_miner_block");
         setHardness(1.0F);
         setResistance(2000.0F);
         setHarvestLevel("pickaxe", 0);
@@ -62,18 +62,18 @@ public class DumbMinerBlock extends BlockContainer {
 
 
     public TileEntity createNewTileEntity(World w, int meta) {
-        return new DumbMinerTile();
+        return new ChunkMinerTile();
     }
 
     public boolean onBlockActivated(World w, int x, int y, int z, EntityPlayer p, int side, float xOffset, float yOffset, float zOffset) {
 //        if (w.isRemote) return false;
 //        if (p.getCurrentEquippedItem() != null) return false;
-        return ((DumbMinerTile)w.getTileEntity(x,y,z)).onUse();
+        return ((ChunkMinerTile)w.getTileEntity(x,y,z)).onUse();
     }
 
     public void onNeighborBlockChange(World w, int x, int y, int z, Block block) {
         if (w.isRemote) return;
-        ((DumbMinerTile)w.getTileEntity(x,y,z)).setRedstone(w.isBlockIndirectlyGettingPowered(x, y, z));
+        ((ChunkMinerTile)w.getTileEntity(x,y,z)).setRedstone(w.isBlockIndirectlyGettingPowered(x, y, z));
     }
 
     public int quantityDropped(Random r) {
