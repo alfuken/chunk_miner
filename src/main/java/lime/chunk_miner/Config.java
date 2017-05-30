@@ -4,12 +4,13 @@ import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.Level;
 
 public class Config {
-    private static final String CS = "chunk_scanner";
-    private static final String CM = "miner";
+    private static final String CS = "Scanner";
+    private static final String CM = "Miner";
 //  public static int recipe_level           = 2;
     public static int work_to_mine           = 10;
     public static int seconds_to_mine        = 10;
     public static int levels_to_mine         = 16;
+    public static int area_scan_radius       = 3;
     public static String[] ignored_materials = {" Dust", "Chipped ", "Flawed ", "Crushed "};
     public static boolean skip_poor_ores     = true;
     public static boolean load_chunks        = false;
@@ -23,13 +24,12 @@ public class Config {
         try {
             cfg.load();
 
-            cfg.addCustomCategoryComment(CS, "Scanner configuration");
             ignored_materials = cfg.getStringList("Don't show these materials in scan report", CS, ignored_materials, "List of substrings to ignore when 'Don't show poor ores' is set to 'true'. By default it ignores poor ores and cheap gems. Quarry still mines them though!");
             skip_poor_ores    = cfg.getBoolean("Don't show poor ores in scan report",          CS, skip_poor_ores,    "Don't show poor ores and cheap gems in scan report.");
             inform_gt_chunks  = cfg.getBoolean("Inform about GT Vein chunk",                   CS, inform_gt_chunks,  "If enabled, chunk_scanner will notify player if he is in the chunk where GT Vein core is generated (works only if Gregtech is installed).");
-            scan_mode         = cfg.getString("Scan mode",                                     CS, scan_mode,         "Ore scanning mode. Optimistic is faster: considers valuable all blocks who's name contains substring 'ore'. Classic is slower: uses the same mechanics as IC2 Ore Scanner.", new String[]{"optimistic", "classic"});
+            scan_mode         = cfg.getString("Scan mode",                                     CS, scan_mode,         "Ore scanning mode. Optimistic is faster: considers valuable all blocks who's internal (unlocalized) name contains substring 'ore'. Classic is slower: uses the same mechanics as IC2 Ore Scanner.", new String[]{"optimistic", "classic"});
+            area_scan_radius  = cfg.getInt("Area scan radius in chunks",                       CS, area_scan_radius, 1, 32, "Area scan radius in chunks. Value of 1 scans area 3x3 chunks. Value of 3 scans 7x7 (49) chunks. Higher the number, higher the load on server CPU.");
 
-            cfg.addCustomCategoryComment(CM, "Miner configuration");
             work_to_mine      = cfg.getInt("Work to mine",                                     CM, work_to_mine,     1, Integer.MAX_VALUE, "Amount of 'use' work performed on quarry to manually mine the ore.");
             seconds_to_mine   = cfg.getInt("Seconds to mine",                                  CM, seconds_to_mine,  1, Integer.MAX_VALUE, "Amount of seconds between automatic mining when quarry is redstone powered.");
             levels_to_mine    = cfg.getInt("Mine this amount of Y levels",                     CM, levels_to_mine,   0, 255, "Mine N count of Y levels below miner. Set to 0 to mine the whole chunk top to bottom.");

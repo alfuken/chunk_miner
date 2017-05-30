@@ -13,6 +13,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidBlock;
 import org.apache.commons.lang3.StringUtils;
+import scala.Int;
 
 import java.util.*;
 
@@ -80,6 +81,53 @@ public class ChunkMinerHelpers {
         }
 
         return rows;
+    }
+
+    public static List<String> areaScanReportAsPages(World w, EntityPlayer p, int radius) {
+        long startTime = System.currentTimeMillis();
+
+        ArrayList<String> rows = new ArrayList<String>();
+        Map<String, List<String>> results = new HashMap();
+        int cx = (int)p.posX / 16;
+        int cz = (int)p.posZ / 16;
+
+        for (int x = cx-radius; x <= cx+radius; x++) {
+            for (int z = cz-radius; z <= cz+radius; z++) {
+                Map<String, Integer> ores = scan(w, (x*16)+8, (z*16)+8);
+                Map.Entry<String, Integer> entry = ores.entrySet().iterator().next();
+                String key = entry.getKey();
+
+                List<String> coords_list = results.get(key);
+                if (coords_list == null) coords_list = new ArrayList<String>();
+                coords_list.add(((x*16)+8)+":"+((z*16)+8));
+                results.put(key, coords_list);
+            }
+        }
+
+        SortedSet<String> keys = new TreeSet<String>(results.keySet());
+        for (String key : keys) {
+            rows.add(key + "\n" + StringUtils.join(results.get(key), ", ") + "\n");
+        }
+
+        List<String> pages = new ArrayList<String>();
+        pages.add("");
+
+        for (String row : rows) {
+            String last_page = pages.get(pages.size()-1);
+            if (last_page.length() + row.length() < 253){
+                last_page += row+"\n";
+                pages.set(pages.size()-1, last_page);
+            } else {
+                String new_page = row+"\n";
+                pages.add(new_page);
+            }
+        }
+
+        long endTime = System.currentTimeMillis();
+        long duration = (endTime - startTime);
+        System.out.println("\n===> Area scan of "+cx+":"+cz+" r"+Config.area_scan_radius+" took "+duration+" milliseconds");
+
+        return pages;
     }
 
     public static String chunkScanReportAsString(World w, EntityPlayer p){

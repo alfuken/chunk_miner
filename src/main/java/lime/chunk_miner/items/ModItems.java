@@ -11,7 +11,7 @@ public class ModItems {
         chunk_scanner = new ChunkScanner();
         GameRegistry.registerItem(chunk_scanner, "chunk_scanner");
 
-//        area_scanner = new AreaScanner();
-//        GameRegistry.registerItem(area_scanner, "area_scanner");
+        area_scanner = new AreaScanner();
+        GameRegistry.registerItem(area_scanner, "area_scanner");
     }
 }

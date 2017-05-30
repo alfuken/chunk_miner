@@ -7,7 +7,7 @@ public class ModBlocks {
     public static Block dumb_miner_block;
     public static final void init() {
         dumb_miner_block = new ChunkMinerBlock();
-        GameRegistry.registerBlock(dumb_miner_block, "dumb_miner_block");
+        GameRegistry.registerBlock(dumb_miner_block, "chunk_miner_block");
 
     }
 }

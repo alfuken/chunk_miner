@@ -1,3 +1,4 @@
 item.chunk_miner.chunk_scanner.name=Chunk scanner
+item.chunk_miner.area_scanner.name=Area scanner
 tile.chunk_miner.chunk_miner_block.name=Chunk miner
 itemGroup.ChunkMiner=Chunk Miner

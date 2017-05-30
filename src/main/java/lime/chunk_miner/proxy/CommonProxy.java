@@ -29,7 +29,7 @@ public class CommonProxy {
     public void preInit(FMLPreInitializationEvent e) {
         logger = e.getModLog();
         File directory = e.getModConfigurationDirectory();
-        config = new Configuration(new File(directory.getPath(), "dumb_miner.cfg"));
+        config = new Configuration(new File(directory.getPath(), "chunk_miner.cfg"));
         Config.readConfig();
 
         if (Config.load_chunks){
@@ -46,6 +46,13 @@ public class CommonProxy {
                 "DS",
                 "SD",
                 'S', Items.stick, 'D', Blocks.dirt
+        );
+
+        GameRegistry.addRecipe(new ItemStack(ModItems.area_scanner),
+                "RRR",
+                "RAR",
+                "RRR",
+                'R', ModItems.chunk_scanner, 'A', Items.apple
         );
 
 //        GameRegistry.addRecipe(new ItemStack(ModItems.area_scanner),
