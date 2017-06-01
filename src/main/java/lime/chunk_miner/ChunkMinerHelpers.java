@@ -83,51 +83,28 @@ public class ChunkMinerHelpers {
         return rows;
     }
 
-    public static List<String> areaScanReportAsPages(World w, EntityPlayer p, int radius) {
-        long startTime = System.currentTimeMillis();
 
-        ArrayList<String> rows = new ArrayList<String>();
+    public static Map<String, List<String>> areaScanReport(World w, EntityPlayer p, int radius) {
         Map<String, List<String>> results = new HashMap();
         int cx = (int)p.posX / 16;
         int cz = (int)p.posZ / 16;
 
         for (int x = cx-radius; x <= cx+radius; x++) {
             for (int z = cz-radius; z <= cz+radius; z++) {
-                Map<String, Integer> ores = scan(w, (x*16)+8, (z*16)+8);
-                Map.Entry<String, Integer> entry = ores.entrySet().iterator().next();
-                String key = entry.getKey();
+                try {
+                    Map<String, Integer> ores = scan(w, (x*16)+8, (z*16)+8);
+                    Map.Entry<String, Integer> entry = ores.entrySet().iterator().next();
+                    String key = entry.getKey();
 
-                List<String> coords_list = results.get(key);
-                if (coords_list == null) coords_list = new ArrayList<String>();
-                coords_list.add(((x*16)+8)+":"+((z*16)+8));
-                results.put(key, coords_list);
+                    List<String> coords_list = results.get(key);
+                    if (coords_list == null) coords_list = new ArrayList<String>();
+                    coords_list.add(((x*16)+8)+":"+((z*16)+8));
+                    results.put(key, coords_list);
+                } catch (NoSuchElementException nsee){}
             }
         }
 
-        SortedSet<String> keys = new TreeSet<String>(results.keySet());
-        for (String key : keys) {
-            rows.add(key + "\n" + StringUtils.join(results.get(key), ", ") + "\n");
-        }
-
-        List<String> pages = new ArrayList<String>();
-        pages.add("");
-
-        for (String row : rows) {
-            String last_page = pages.get(pages.size()-1);
-            if (last_page.length() + row.length() < 253){
-                last_page += row+"\n";
-                pages.set(pages.size()-1, last_page);
-            } else {
-                String new_page = row+"\n";
-                pages.add(new_page);
-            }
-        }
-
-        long endTime = System.currentTimeMillis();
-        long duration = (endTime - startTime);
-        System.out.println("\n===> Area scan of "+cx+":"+cz+" r"+Config.area_scan_radius+" took "+duration+" milliseconds");
-
-        return pages;
+        return results;
     }
 
     public static String chunkScanReportAsString(World w, EntityPlayer p){
@@ -136,19 +113,19 @@ public class ChunkMinerHelpers {
 
     public static boolean trashBlock(Block block){
         return (block == null
-             || block instanceof BlockStone
-             || block instanceof BlockAir
-             || block instanceof IFluidBlock
-             || block instanceof BlockStaticLiquid
-             || block instanceof BlockDynamicLiquid
-             || block instanceof BlockDirt
-             || block instanceof BlockSand
-             || block instanceof BlockSandStone
-             || block instanceof BlockGravel
-             || block == Blocks.bedrock
-             || block == Blocks.cobblestone
-             || block == Blocks.gravel
-             || block == Blocks.obsidian
+                || block instanceof BlockStone
+                || block instanceof BlockAir
+                || block instanceof IFluidBlock
+                || block instanceof BlockStaticLiquid
+                || block instanceof BlockDynamicLiquid
+                || block instanceof BlockDirt
+                || block instanceof BlockSand
+                || block instanceof BlockSandStone
+                || block instanceof BlockGravel
+                || block == Blocks.bedrock
+                || block == Blocks.cobblestone
+                || block == Blocks.gravel
+                || block == Blocks.obsidian
         );
     }
 
