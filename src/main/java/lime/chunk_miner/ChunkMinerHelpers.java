@@ -13,7 +13,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidBlock;
 import org.apache.commons.lang3.StringUtils;
-import scala.Int;
 
 import java.util.*;
 

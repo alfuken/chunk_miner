@@ -26,21 +26,16 @@ public class AreaScanner extends Item {
 
     public ItemStack onItemRightClick(ItemStack itemStack, World w, EntityPlayer p) {
         if (w.isRemote){return itemStack;}
-
-        List<String> ddd = new ArrayList<String>();
-        ddd.add("Yellow Limonite");
-        ddd.add("Brown Limonite");
-        ddd.add("Magnetite");
-        new ScanResultsPane(ddd).show();
-
         int range = Config.area_scan_radius;
 
         if (itemStack.getDisplayName().startsWith("range")){
             range = 8;
         }
 
-//        saveScanData(p, ChunkMinerHelpers.areaScanReport(w, p, range));
+        saveScanData(p, ChunkMinerHelpers.areaScanReport(w, p, range));
 //        generateBook(p, scanReportAsPages(loadScanData(p)));
+
+        new ScanResultsPane(p, loadScanData(p)).show();
 
         if (!p.capabilities.isCreativeMode) --itemStack.stackSize;
 
