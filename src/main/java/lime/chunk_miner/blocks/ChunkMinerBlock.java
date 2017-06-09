@@ -66,13 +66,17 @@ public class ChunkMinerBlock extends BlockContainer {
     }
 
     public boolean onBlockActivated(World w, int x, int y, int z, EntityPlayer p, int side, float xOffset, float yOffset, float zOffset) {
-//        if (w.isRemote) return false;
-//        if (p.getCurrentEquippedItem() != null) return false;
+        if (w.isRemote) return false;
+        if (p.getCurrentEquippedItem() != null) ((ChunkMinerTile)w.getTileEntity(x,y,z)).statusReport(p);
         return ((ChunkMinerTile)w.getTileEntity(x,y,z)).onUse();
     }
 
     public void onNeighborBlockChange(World w, int x, int y, int z, Block block) {
         if (w.isRemote) return;
+        ChunkMinerBlock.updateRSStatus(w, x,y,z);
+    }
+
+    public static void updateRSStatus(World w, int x, int y, int z){
         ((ChunkMinerTile)w.getTileEntity(x,y,z)).setRedstone(w.isBlockIndirectlyGettingPowered(x, y, z));
     }
 

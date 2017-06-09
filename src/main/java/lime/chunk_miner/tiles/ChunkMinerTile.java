@@ -3,10 +3,13 @@ package lime.chunk_miner.tiles;
 import lime.chunk_miner.ChunkMiner;
 import lime.chunk_miner.ChunkMinerHelpers;
 import lime.chunk_miner.Config;
+import lime.chunk_miner.blocks.ChunkMinerBlock;
 import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -18,6 +21,7 @@ import java.util.List;
 import static ic2.core.util.StackUtil.distribute;
 
 public class ChunkMinerTile extends TileEntity {
+    private int boot_up_cooldown = 10;
     private int work_progress = 0;
     private int ticker = 0;
     private int currX = -1;
@@ -32,6 +36,13 @@ public class ChunkMinerTile extends TileEntity {
 
     public void updateEntity(){
         if (this.worldObj.isRemote) return;
+
+        if (boot_up_cooldown == 0) {
+            ChunkMinerBlock.updateRSStatus(this.worldObj, this.xCoord,this.yCoord, this.zCoord);
+        } else {
+            boot_up_cooldown--;
+        }
+
         if (Config.require_redstone && !redstone) return;
 
         if (ticker >= Config.seconds_to_mine * 20){
@@ -40,6 +51,10 @@ public class ChunkMinerTile extends TileEntity {
         } else {
             ticker++;
         }
+    }
+
+    public void statusReport(EntityPlayer player){
+        player.addChatMessage(new ChatComponentText(currX+":"+currY+":"+currZ+" r:"+redstone+" m:"+mineFromY()+"-"+mineToY()));
     }
 
     public boolean onUse(){
@@ -64,19 +79,14 @@ public class ChunkMinerTile extends TileEntity {
     private boolean work() {
         if (this.worldObj.isRemote) return false;
 
+        checkYLimit(currY);
+
         Chunk c = this.worldObj.getChunkFromBlockCoords(this.xCoord, this.zCoord);
 
         if (currY == -1) currY = mineFromY();
 
         for (int y = currY; y > mineToY(); y--) {
-            if (y == mineToY()) {
-                if (Config.selfdestruct) {
-                    getWorldObj().setBlockToAir(this.xCoord, this.yCoord, this.zCoord);
-                } else {
-                    setRedstone(false);
-                }
-            }
-
+            checkYLimit(y);
             for (int x = c.xPosition * 16; x < c.xPosition * 16 + 16; x++) {
                 for (int z = c.zPosition * 16; z < c.zPosition * 16 + 16; z++) {
                     currX = x;
@@ -88,6 +98,17 @@ public class ChunkMinerTile extends TileEntity {
         }
 
         return false;
+    }
+
+    private void checkYLimit(int y){
+        if (y == mineToY()) {
+            System.out.println("----- DESTROY -----");
+            if (Config.selfdestruct) {
+                getWorldObj().setBlockToAir(this.xCoord, this.yCoord, this.zCoord);
+            } else {
+                setRedstone(false);
+            }
+        }
     }
 
     private boolean doMine() {

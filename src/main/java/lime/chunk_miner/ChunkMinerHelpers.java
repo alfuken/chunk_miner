@@ -22,107 +22,154 @@ import java.util.*;
 
 public class ChunkMinerHelpers {
 
-    public static List<String> scanReportAsPages(Map<String, List<String>> results) {
-        ArrayList<String> rows = new ArrayList<String>();
-        SortedSet<String> keys = new TreeSet<String>(results.keySet());
-        for (String key : keys) {
-            rows.add(key + "\n" + StringUtils.join(results.get(key), ", ") + "\n");
-        }
-
-        List<String> pages = new ArrayList<String>();
-        pages.add("");
-
-        for (String row : rows) {
-            String last_page = pages.get(pages.size()-1);
-            if (last_page.length() + row.length() < 253){
-                last_page += row+"\n";
-                pages.set(pages.size()-1, last_page);
-            } else {
-                String new_page = row+"\n";
-                pages.add(new_page);
-            }
-        }
-
-        return pages;
+    public static Map<String, String> areaScanReportOre(World w, int wx, int wz, int radius) {
+        return areaScanReport(w, wx, wz, radius, true);
     }
 
-    public static Map<String, List<String>> loadScanData(EntityPlayer player) {
-        NBTTagCompound player_root_tag = player.getEntityData();
-        NBTTagCompound stored_scan_results = player_root_tag.getCompoundTag("stored_scan_results");
-        if (stored_scan_results == null) stored_scan_results = new NBTTagCompound();
+    public static Map<String, String> areaScanReportOil(World w, int wx, int wz, int radius) {
+        return areaScanReport(w, wx, wz, radius, false);
+    }
 
-        Map<String, List<String>> results = new HashMap<String, List<String>>();
+    public static Map<String, String> areaScanReport(World w, int wx, int wz, int radius, boolean ore) {
+        long startTime = System.currentTimeMillis();
 
-        SortedSet<String> keys = new TreeSet<String>();
-        for (Object _ore_name : stored_scan_results.func_150296_c()) keys.add((String) _ore_name);
-        for (String ore_name : keys) {
-            NBTTagList coords_tags_for_ore = stored_scan_results.getTagList(ore_name, 8);
+        Map<String, String> coord_list = new HashMap<String, String>();
+        int cx = wx / 16;
+        int cz = wz / 16;
 
-            SortedSet<String> coords_list_for_ore = new TreeSet<String>();
-
-            for (int i = 0; i < coords_tags_for_ore.tagCount(); i++) {
-                coords_list_for_ore.add(coords_tags_for_ore.getStringTagAt(i));
+        for (int x = cx-radius; x <= cx+radius; x++) {
+            for (int z = cz-radius; z <= cz+radius; z++) {
+                if (ore){
+                    try {
+                        Map<String, Integer> ores = scan(w, (x*16)+8, (z*16)+8);
+                        Map.Entry<String, Integer> most_common = ores.entrySet().iterator().next();
+                        String ore_name = most_common.getKey();
+                        coord_list.put(x+":"+z, ore_name);
+                    } catch (NoSuchElementException e){}
+                } else { // oil
+                    if (Loader.isModLoaded("gregtech")){
+                        FluidStack fluid = GT_Utility.getUndergroundOil(w, (x*16)+8, (z*16)+8);
+                        if (fluid.amount >= 5000) coord_list.put(x+":"+z, fluid.amount/1000+" x "+fluid.getLocalizedName());
+                    }
+                }
             }
+        }
 
-            results.put(ore_name, new ArrayList<String>(coords_list_for_ore));
+        long endTime = System.currentTimeMillis();
+        long duration = (endTime - startTime);
+        System.out.println("\n===> areaScanReport2(w, "+cx+", "+cz+", "+radius+", "+ore+") took "+duration+"ms");
+
+        return coord_list;
+    }
+
+
+    public static void saveScanData(EntityPlayer player, String storage_key, Map<String, String> scan_data){
+        NBTTagCompound stored_scan_data = player.getEntityData().getCompoundTag(storage_key);
+        if (stored_scan_data == null) stored_scan_data = new NBTTagCompound();
+
+        for (String coord : scan_data.keySet()) {
+            stored_scan_data.setTag(coord, new NBTTagString(scan_data.get(coord)));
+        }
+
+        player.getEntityData().setTag(storage_key, stored_scan_data);
+    }
+
+    public static Map<String, String> loadScanDataOre(EntityPlayer player) {
+        return loadScanData(player, "ore_scan_data");
+    }
+
+    public static Map<String, String> loadScanDataOil(EntityPlayer player) {
+        return loadScanData(player, "oil_scan_data");
+    }
+
+    public static Map<String, String> loadScanData(EntityPlayer player, String storage_key) {
+        NBTTagCompound stored_scan_data = player.getEntityData().getCompoundTag(storage_key);
+        if (stored_scan_data == null) stored_scan_data = new NBTTagCompound();
+
+        Map<String, String> results = new HashMap<String, String>();
+
+        for (Object _coord : stored_scan_data.func_150296_c()) {
+            String coord = (String)_coord;
+            results.put(coord, stored_scan_data.getString(coord));
         }
 
         return results;
     }
 
-    public static int[] saveScanData(EntityPlayer player, Map<String, List<String>> scan_results){
-        int scanned = 0;
-        int added = 0;
-        NBTTagCompound player_root_tag = player.getEntityData();
-        NBTTagCompound stored_scan_results = player_root_tag.getCompoundTag("stored_scan_results");
-        if (stored_scan_results == null) stored_scan_results = new NBTTagCompound();
-
-        SortedSet<String> ore_names = new TreeSet<String>(scan_results.keySet());
-        for (String ore_name : ore_names) {
-
-            if (!stored_scan_results.hasKey(ore_name)) stored_scan_results.setTag(ore_name, new NBTTagList());
-
-            NBTTagList coords_tags_for_ore = stored_scan_results.getTagList(ore_name, 8);
-
-            List<String> coords_list_for_ore = new ArrayList<String>();
-
-            // first we collect already stored coord pairs
-            for (int i = 0; i < coords_tags_for_ore.tagCount(); i++) {
-                coords_list_for_ore.add(coords_tags_for_ore.getStringTagAt(i));
-            }
-
-            // then for each new pair
-            for (String pair : scan_results.get(ore_name)){
-                scanned++;
-                // we check if it's already stored and if not, store
-                if (!coords_list_for_ore.contains(pair)){
-                    added++;
-                    coords_tags_for_ore.appendTag(new NBTTagString(pair));
-                }
-            }
-
-            stored_scan_results.setTag(ore_name, coords_tags_for_ore);
-        }
-
-        player.getEntityData().setTag("stored_scan_results", stored_scan_results);
-        return new int[]{scanned, added};
+    public static String[] getScanDataNames(Map<String, String> data){
+        Collection<String> vals = data.values();
+        return new TreeSet<String>(vals).toArray(new String[vals.size()]);
     }
 
-    public void generateBook(EntityPlayer player, List<String> pages){
-        ItemStack book = new ItemStack(Items.written_book);
-
-        NBTTagCompound tag = new NBTTagCompound();
-        NBTTagList bookPages = new NBTTagList();
-        for(String page : pages){
-            bookPages.appendTag(new NBTTagString(page));
+    public static String[] getScanDataCoordsByName(Map<String, String> data, String name){
+        List<String> coords = new ArrayList<String>();
+        for (Map.Entry<String, String> entry : data.entrySet()){
+            if (entry.getValue().equals(name)) coords.add(entry.getKey());
         }
-        book.setTagInfo("pages", bookPages);
-        book.setTagInfo("author", new NBTTagString(player.getDisplayName()));
-        book.setTagInfo("title", new NBTTagString("Ore scans"));
-
-        // Give the player the book
-        player.inventory.addItemStackToInventory(book);
+        return coords.toArray(new String[coords.size()]);
     }
+
+//    public static Map<String, List<String>> loadScanData(EntityPlayer player) {
+//        NBTTagCompound player_root_tag = player.getEntityData();
+//        NBTTagCompound stored_scan_results = player_root_tag.getCompoundTag("stored_scan_results");
+//        if (stored_scan_results == null) stored_scan_results = new NBTTagCompound();
+//
+//        Map<String, List<String>> results = new HashMap<String, List<String>>();
+//
+//        SortedSet<String> keys = new TreeSet<String>();
+//        for (Object _ore_name : stored_scan_results.func_150296_c()) keys.add((String) _ore_name);
+//        for (String ore_name : keys) {
+//            NBTTagList coords_tags_for_ore = stored_scan_results.getTagList(ore_name, 8);
+//
+//            SortedSet<String> coords_list_for_ore = new TreeSet<String>();
+//
+//            for (int i = 0; i < coords_tags_for_ore.tagCount(); i++) {
+//                coords_list_for_ore.add(coords_tags_for_ore.getStringTagAt(i));
+//            }
+//
+//            results.put(ore_name, new ArrayList<String>(coords_list_for_ore));
+//        }
+//
+//        return results;
+//    }
+//
+//    public static int[] saveScanData(EntityPlayer player, Map<String, List<String>> scan_results){
+//        int scanned = 0;
+//        int added = 0;
+//        NBTTagCompound player_root_tag = player.getEntityData();
+//        NBTTagCompound stored_scan_results = player_root_tag.getCompoundTag("stored_scan_results");
+//        if (stored_scan_results == null) stored_scan_results = new NBTTagCompound();
+//
+//        SortedSet<String> ore_names = new TreeSet<String>(scan_results.keySet());
+//        for (String ore_name : ore_names) {
+//
+//            if (!stored_scan_results.hasKey(ore_name)) stored_scan_results.setTag(ore_name, new NBTTagList());
+//
+//            NBTTagList coords_tags_for_ore = stored_scan_results.getTagList(ore_name, 8);
+//
+//            List<String> coords_list_for_ore = new ArrayList<String>();
+//
+//            // first we collect already stored coord pairs
+//            for (int i = 0; i < coords_tags_for_ore.tagCount(); i++) {
+//                coords_list_for_ore.add(coords_tags_for_ore.getStringTagAt(i));
+//            }
+//
+//            // then for each new pair
+//            for (String pair : scan_results.get(ore_name)){
+//                scanned++;
+//                // we check if it's already stored and if not, store
+//                if (!coords_list_for_ore.contains(pair)){
+//                    added++;
+//                    coords_tags_for_ore.appendTag(new NBTTagString(pair));
+//                }
+//            }
+//
+//            stored_scan_results.setTag(ore_name, coords_tags_for_ore);
+//        }
+//
+//        player.getEntityData().setTag("stored_scan_results", stored_scan_results);
+//        return new int[]{scanned, added};
+//    }
 
     public static boolean isGtChunk(int x, int z){
         return ((x / 16 - 1) % 3 == 0) && ((z / 16 - 1) % 3 == 0);
@@ -137,6 +184,8 @@ public class ChunkMinerHelpers {
 
         if (Config.scan_mode.equals("optimistic")){
             return (potentiallyValuableBlock(block));
+        } else if (Config.scan_mode.equals("pessimistic")){
+            return (potentiallyValuableBlock2(block));
         } else if (Config.scan_mode.equals("classic")) {
             if (trashBlock(block)) return false;
             return (isValuable(new ItemStack(block, 1, w.getBlockMetadata(x, y, z))));
@@ -189,34 +238,34 @@ public class ChunkMinerHelpers {
     }
 
 
-    public static Map<String, List<String>> areaScanReport(World w, EntityPlayer p, int radius) {
-        long startTime = System.currentTimeMillis();
-
-        Map<String, List<String>> results = new HashMap();
-        int cx = (int)p.posX / 16;
-        int cz = (int)p.posZ / 16;
-
-        for (int x = cx-radius; x <= cx+radius; x++) {
-            for (int z = cz-radius; z <= cz+radius; z++) {
-                try {
-                    Map<String, Integer> ores = scan(w, (x*16)+8, (z*16)+8);
-                    Map.Entry<String, Integer> entry = ores.entrySet().iterator().next();
-                    String key = entry.getKey();
-
-                    List<String> coords_list = results.get(key);
-                    if (coords_list == null) coords_list = new ArrayList<String>();
-                    coords_list.add(((x*16)+8)+":"+((z*16)+8));
-                    results.put(key, coords_list);
-                } catch (NoSuchElementException nsee){}
-            }
-        }
-
-        long endTime = System.currentTimeMillis();
-        long duration = (endTime - startTime);
-        System.out.println("\n===> Area scan at "+cx+":"+cz+" took "+duration+" milliseconds");
-
-        return results;
-    }
+//    public static Map<String, List<String>> areaScanReport(World w, EntityPlayer p, int radius) {
+//        long startTime = System.currentTimeMillis();
+//
+//        Map<String, List<String>> results = new HashMap();
+//        int cx = (int)p.posX / 16;
+//        int cz = (int)p.posZ / 16;
+//
+//        for (int x = cx-radius; x <= cx+radius; x++) {
+//            for (int z = cz-radius; z <= cz+radius; z++) {
+//                try {
+//                    Map<String, Integer> ores = scan(w, (x*16)+8, (z*16)+8);
+//                    Map.Entry<String, Integer> entry = ores.entrySet().iterator().next();
+//                    String key = entry.getKey();
+//
+//                    List<String> coords_list = results.get(key);
+//                    if (coords_list == null) coords_list = new ArrayList<String>();
+//                    coords_list.add(((x*16)+8)+":"+((z*16)+8));
+//                    results.put(key, coords_list);
+//                } catch (NoSuchElementException nsee){}
+//            }
+//        }
+//
+//        long endTime = System.currentTimeMillis();
+//        long duration = (endTime - startTime);
+//        System.out.println("\n===> areaScanReport(w, "+cx+":"+cz+", "+radius+") took "+duration+"ms");
+//
+//        return results;
+//    }
 
     public static String chunkScanReportAsString(World w, EntityPlayer p){
         return StringUtils.join(chunkScanReportAsList(w, p), " - ");
@@ -226,17 +275,17 @@ public class ChunkMinerHelpers {
         return (block == null
              || block instanceof BlockStone
              || block instanceof BlockAir
+             || block instanceof BlockDirt
              || block instanceof IFluidBlock
              || block instanceof BlockStaticLiquid
              || block instanceof BlockDynamicLiquid
-             || block instanceof BlockDirt
              || block instanceof BlockSand
              || block instanceof BlockSandStone
              || block instanceof BlockGravel
-             || block == Blocks.bedrock
-             || block == Blocks.cobblestone
-             || block == Blocks.gravel
-             || block == Blocks.obsidian
+//             || block.equals(Blocks.bedrock)
+//             || block.equals(Blocks.cobblestone)
+//             || block.equals(Blocks.gravel)
+//             || block.equals(Blocks.obsidian)
         );
     }
 
@@ -259,6 +308,9 @@ public class ChunkMinerHelpers {
 
                     if (Config.scan_mode.equals("optimistic")){
                         if (!potentiallyValuableBlock(block)) continue;
+                        meta = w.getBlockMetadata(x, y, z);
+                    } else if (Config.scan_mode.equals("pessimistic")){
+                        if (!potentiallyValuableBlock2(block)) continue;
                         meta = w.getBlockMetadata(x, y, z);
                     } else if (Config.scan_mode.equals("classic")) {
                         if (trashBlock(block)) continue;
@@ -288,7 +340,7 @@ public class ChunkMinerHelpers {
 
         long endTime = System.currentTimeMillis();
         long duration = (endTime - startTime);
-        System.out.println("\n===> Scan of "+wx+":"+wz+" took "+duration+" milliseconds");
+        System.out.println("\n===> scan(w, "+wx+", "+wz+") took "+duration+"ms");
 
         return sortByValue(ret);
     }

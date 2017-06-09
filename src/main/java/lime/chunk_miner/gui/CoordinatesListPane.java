@@ -13,12 +13,12 @@ import net.minecraft.util.ResourceLocation;
 import java.util.*;
 
 public class CoordinatesListPane extends GlassPane {
-    private List<String> prepare_coords(EntityPlayer player, List<String> coords){
+    private List<String> prepare_coords(EntityPlayer player, String[] coords){
         Map<Double, String> new_coords = new HashMap<Double, String>();
         for(String e : coords){
             String[] pair = e.split(":");
-            double d = player.getDistance(Integer.parseInt(pair[0]), player.posY, Integer.parseInt(pair[1]));
-            new_coords.put(d, e);
+            double d = player.getDistance(Integer.parseInt(pair[0])*16, player.posY, Integer.parseInt(pair[1])*16);
+            new_coords.put(d, Integer.parseInt(pair[0])*16+":"+Integer.parseInt(pair[1])*16+" ("+e+")");
         }
 
         List<String> new_coords_list = new ArrayList<String>();
@@ -29,66 +29,38 @@ public class CoordinatesListPane extends GlassPane {
         return new_coords_list;
     }
 
-    public CoordinatesListPane(EntityPlayer player, String name, List<String> data){
+    public CoordinatesListPane(final EntityPlayer player, final String name, final String[] data){
         setRevertAllowed(true);
         setName("CoordinatesListPane");
         setShadowbox(null);
 
-        PaneImage image = new PaneImage(new ResourceLocation("textures/gui/my_book.png"));
-        image.setZIndex(-1);
-        image.setAutoPositionX(true);
-        image.setRelativeX(0.5D);
-        image.setRelativeXOffset(-150);
-        image.setY(5);
-        image.setWidth(297);
-        image.setHeight(364);
-        add(image);
+        add(GuiHelpers.book_background());
+        add(GuiHelpers.back_button());
 
-        final PaneButton back = new PaneButton("<");
-        back.setAutoPositionX(true);
-        back.setRelativeX(0.5D);
-        back.setRelativeXOffset(-115);
-        back.setWidth(20);
-        back.setHeight(20);
-        back.setY(40);
-        back.registerActivationListener(new Runnable() {
-            public void run() {
-                back.getGlassPane().revert();
+        PaneScrollPanel scroll_panel = GuiHelpers.scroll_panel(name+"\nDistance & Coordinates (Chunk)");
+
+            int i = 1;
+            for(String e : prepare_coords(player, data)){
+                PaneLabel label = GuiHelpers.label(e, i);
+                scroll_panel.add(label);
+                i++;
             }
-        });
-        add(back);
-
-        PaneScrollPanel scroll_panel = new PaneScrollPanel();
-        PaneLabel title_label = PaneLabel.createTitleLabel(name+"\nDistance & Coordinates");
-        title_label.setY(15);
-        title_label.setColor(0x444444);
-        title_label.setShadow(false);
-
-        scroll_panel.add(title_label);
-
-        scroll_panel.setAutoPositionX(true);
-        scroll_panel.setRelativeX(0.5D);
-        scroll_panel.setRelativeXOffset(-135);
-        scroll_panel.setWidth(280);
-        scroll_panel.setHeight(300);
-        scroll_panel.setY(30);
-        scroll_panel.setShadowed(false);
-
-        int i = 0;
-        for(String e : prepare_coords(player, data)){
-            PaneLabel label = new PaneLabel(e);
-            label.setX(43);
-            label.setY(45+(13*i));
-            label.setAlignmentX(HorzAlignment.MIDDLE);
-            label.setAlignmentY(VertAlignment.MIDDLE);
-            label.setColor(0x222222);
-            label.setShadow(false);
-
-            scroll_panel.add(label);
-            i++;
-        }
 
         add(scroll_panel);
 
+        PaneButton map = new PaneButton("map");
+        map.setWidth(25);
+        map.setHeight(15);
+        map.setAutoPositionX(true);
+        map.setRelativeX(0.5D);
+        map.setRelativeXOffset(75);
+        map.setY(15);
+        map.registerActivationListener(new Runnable() {
+            @Override
+            public void run() {
+                new MapPane(player, name, data).show();
+            }
+        });
+        add(map);
     }
 }

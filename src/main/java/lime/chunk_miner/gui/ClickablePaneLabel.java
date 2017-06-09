@@ -43,6 +43,7 @@ public class ClickablePaneLabel extends PaneLabel implements Focusable {
         this.alignmentY = VertAlignment.MIDDLE;
         this.width = 200;
         this.height = 20;
+        if (this.text == null) this.text = "<this.text>";
     }
 
     protected void doTick() {

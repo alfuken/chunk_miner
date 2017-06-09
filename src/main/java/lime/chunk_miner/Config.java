@@ -10,7 +10,7 @@ public class Config {
     public static int work_to_mine           = 10;
     public static int seconds_to_mine        = 10;
     public static int levels_to_mine         = 16;
-    public static int area_scan_radius       = 3;
+    public static int area_scan_radius       = 1;
     public static String[] ignored_materials = {" Dust", "Chipped ", "Flawed ", "Crushed "};
     public static boolean skip_poor_ores     = true;
     public static boolean load_chunks        = false;
