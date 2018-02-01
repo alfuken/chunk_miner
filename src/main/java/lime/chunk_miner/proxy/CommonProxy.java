@@ -1,26 +1,24 @@
 package lime.chunk_miner.proxy;
 
-import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
-import gregtech.api.enums.ItemList;
 import ic2.core.Ic2Items;
 import lime.chunk_miner.ChunkLoadingCallback;
-import lime.chunk_miner.Config;
 import lime.chunk_miner.ChunkMiner;
+import lime.chunk_miner.Config;
 import lime.chunk_miner.blocks.ModBlocks;
 import lime.chunk_miner.events.EnteringChunkEventHandler;
 import lime.chunk_miner.items.ModItems;
 import lime.chunk_miner.tiles.ModTiles;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.oredict.ShapedOreRecipe;
 
 import java.io.File;
 
@@ -44,7 +42,7 @@ public class CommonProxy {
     }
 
     public void init(FMLInitializationEvent e) {
-        MinecraftForge.EVENT_BUS.register(new EnteringChunkEventHandler());
+//        MinecraftForge.EVENT_BUS.register(new EnteringChunkEventHandler());
 
         GameRegistry.addRecipe(new ItemStack(ModItems.chunk_scanner),
                 "DS",
@@ -59,26 +57,35 @@ public class CommonProxy {
                 'R', ModItems.chunk_scanner, 'A', Items.apple
         );
 
-//        GameRegistry.addRecipe(new ItemStack(ModItems.area_scanner),
-//                "RRR",
-//                "RDR",
-//                "RRR",
-//                'D', Blocks.dirt, 'R', ModItems.chunk_scanner
-//        );
+        GameRegistry.addRecipe(new ItemStack(ModItems.scan_registry),
+                "MCB",
+                "PAS",
+                "DKI",
+                'M', Items.map,
+                'C', Items.compass,
+                'B', Items.writable_book,
+                'P', Items.paper,
+                'A', Items.apple,
+                'S', ModItems.chunk_scanner,
+                'D', Blocks.dirt,
+                'K', Items.comparator,
+                'I', Items.stick
 
-        Item hull;
-        if (Loader.isModLoaded("gregtech")){
-            hull = ItemList.Hull_Bronze.getItem();
-        } else {
-            hull = Ic2Items.machine.getItem();
-        }
-
-        GameRegistry.addRecipe(new ItemStack(ModBlocks.dumb_miner_block),
-            "DHS",
-            "PPP",
-            "SPD",
-            'S', Items.stick, 'D', Blocks.dirt, 'H', hull, 'P', Ic2Items.platebronze
         );
+
+        GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(ModBlocks.dumb_miner_block),
+                "SLB",
+                "RMR",
+                "DKI",
+                'S', ModItems.chunk_scanner,
+                'L', Blocks.lever,
+                'B', Blocks.wooden_button,
+                'R', Blocks.redstone_block,
+                'M', Ic2Items.machine.getItem(),
+                'D', Blocks.dirt,
+                'K', Items.comparator,
+                'I', Items.stick
+        ));
 
     }
 

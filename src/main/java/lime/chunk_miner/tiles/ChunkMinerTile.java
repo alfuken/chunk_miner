@@ -4,16 +4,18 @@ import lime.chunk_miner.ChunkMiner;
 import lime.chunk_miner.ChunkMinerHelpers;
 import lime.chunk_miner.Config;
 import lime.chunk_miner.blocks.ChunkMinerBlock;
-import net.minecraft.block.Block;
+import net.minecraft.block.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.fluids.IFluidBlock;
 
 import java.util.Iterator;
 import java.util.List;
@@ -21,105 +23,174 @@ import java.util.List;
 import static ic2.core.util.StackUtil.distribute;
 
 public class ChunkMinerTile extends TileEntity {
-    private int boot_up_cooldown = 10;
+    private int update_cooldown = 20;
     private int work_progress = 0;
-    private int ticker = 0;
+    private int seconds_to_mine = Config.seconds_to_mine;
+    private int cooldown = seconds_to_mine;
     private int currX = -1;
     private int currY = -1;
     private int currZ = -1;
     private boolean redstone = false;
     private ForgeChunkManager.Ticket chunkTicket;
+    public int mode = 0;
+    private EntityPlayer owner;
+    private String owner_name;
+    private Chunk currChunk;
 
+    private void setChunk(){
+        this.currChunk = this.getWorldObj().getChunkFromBlockCoords(this.xCoord, this.zCoord);
+    }
     public void setRedstone(boolean value){
         this.redstone = value;
+    }
+    public void setOwner(EntityPlayer owner){
+        if (owner == null) return;
+        this.owner = owner;
+        this.owner_name = owner.getCommandSenderName();
+    }
+    public EntityPlayer getOwner(){
+        if (owner == null && owner_name != null) setOwner(this.getWorldObj().getPlayerEntityByName(owner_name));
+        return this.owner;
     }
 
     public void updateEntity(){
         if (this.worldObj.isRemote) return;
 
-        if (boot_up_cooldown == 0) {
+        if (update_cooldown > 0) {
+            update_cooldown--;
+            return;
+        } else {
+            update_cooldown = 20;
+        }
+
+        setUp();
+        update();
+    }
+
+    private void setUp(){
+        if (owner == null && owner_name != null) setOwner(this.getWorldObj().getPlayerEntityByName(owner_name));
+        if (currChunk == null) setChunk();
+        if (currY == -1) currY = mineFromY();
+    }
+
+    private void update(){
+        if (Config.require_redstone) {
             ChunkMinerBlock.updateRSStatus(this.worldObj, this.xCoord,this.yCoord, this.zCoord);
-        } else {
-            boot_up_cooldown--;
+            if (!redstone) return;
         }
 
-        if (Config.require_redstone && !redstone) return;
-
-        if (ticker >= Config.seconds_to_mine * 20){
-            ticker = 0;
+        if (cooldown > 0){
+            cooldown--;
+        } else {
+            cooldown = seconds_to_mine;
             if (this.work()) this.markDirty();
-        } else {
-            ticker++;
         }
+    }
+
+    public void nextMode(){
+        if (mode == 0){
+            mode = 1;
+        } else if (mode == 1) {
+            mode = 2;
+        } else if (mode == 2) {
+            mode = 0;
+        } else {
+            mode = 0;
+        }
+        currY = mineFromY();
+        updateCooldownSize();
+    }
+
+    private void updateCooldownSize(){
+        seconds_to_mine = (mode == 0 || mode == 1) ? Config.seconds_to_mine : Config.seconds_to_mine / 2;
+        if (seconds_to_mine < 1) seconds_to_mine = 1;
     }
 
     public void statusReport(EntityPlayer player){
-        player.addChatMessage(new ChatComponentText(currX+":"+currY+":"+currZ+" r:"+redstone+" m:"+mineFromY()+"-"+mineToY()));
+        player.addChatMessage(new ChatComponentText("Miner currently checking block at "+currX+":"+currY+":"+currZ+", redstone: "+redstone+", mines down from "+mineFromY()+". Cooldown: "+ cooldown +" ("+ seconds_to_mine +")"));
+    }
+
+    public void report(String text) {
+        getOwner().addChatMessage(new ChatComponentText(text));
     }
 
     public boolean onUse(){
-        if (this.worldObj.isRemote) return true;
+        if (this.worldObj.isRemote) return false;
         if (work_progress >= Config.work_to_mine){
             work_progress = 0;
             if (this.work()) this.markDirty();
         } else {
             work_progress++;
         }
-        return true;
+        return false;
     }
 
     private int mineFromY(){
-        return Config.levels_to_mine == 0 ? this.worldObj.getChunkFromBlockCoords(this.xCoord, this.zCoord).getTopFilledSegment() + 16 : this.yCoord - 1;
-    }
-
-    private int mineToY(){
-        return Config.levels_to_mine == 0 ? 0 : this.yCoord - Config.levels_to_mine;
+//        return this.worldObj.getChunkFromBlockCoords(this.xCoord, this.zCoord).getTopFilledSegment() + 16;
+        return this.yCoord - 1;
     }
 
     private boolean work() {
         if (this.worldObj.isRemote) return false;
 
-        checkYLimit(currY);
-
-        Chunk c = this.worldObj.getChunkFromBlockCoords(this.xCoord, this.zCoord);
-
-        if (currY == -1) currY = mineFromY();
-
-        for (int y = currY; y > mineToY(); y--) {
-            checkYLimit(y);
-            for (int x = c.xPosition * 16; x < c.xPosition * 16 + 16; x++) {
-                for (int z = c.zPosition * 16; z < c.zPosition * 16 + 16; z++) {
+        while (currY > 0) {
+            for (int x = (currChunk.xPosition * 16); x < (currChunk.xPosition * 16) + 16; x++) {
+                for (int z = (currChunk.zPosition * 16); z < (currChunk.zPosition * 16) + 16; z++) {
                     currX = x;
-                    currY = y;
                     currZ = z;
-                    if (shouldMine()) return doMine();
+                    if (mine()) return true;
                 }
             }
+            currY--;
         }
+
+        if (this.currY == 0) finish();
 
         return false;
     }
 
-    private void checkYLimit(int y){
-        if (y == mineToY()) {
-            System.out.println("----- DESTROY -----");
-            if (Config.selfdestruct) {
-                getWorldObj().setBlockToAir(this.xCoord, this.yCoord, this.zCoord);
-            } else {
-                setRedstone(false);
-            }
+    private boolean mine(){
+        Block block = this.worldObj.getBlock(this.currX, this.currY, this.currZ);
+        if (mineable(block)) {
+            int meta = this.worldObj.getBlockMetadata(this.currX, this.currY, this.currZ);
+            List<ItemStack> drops = block.getDrops(this.worldObj, this.currX, this.currY, this.currZ, meta, 0);
+            distributeDrop(this, drops);
+            this.worldObj.setBlockToAir(this.currX, this.currY, this.currZ);
+            return true;
+        } else if (shouldRemoveFluidblock(block)) {
+            this.worldObj.setBlockToAir(this.currX, this.currY, this.currZ);
+        }
+        return false;
+    }
+
+    private boolean shouldRemoveFluidblock(Block block){
+        // TODO: add config to disable water and/or lava removal
+        if (mode == 0) return false;
+        return(block instanceof IFluidBlock || block instanceof BlockLiquid);
+    }
+
+    private void finish(){
+        if (getOwner() != null) {
+            getOwner().addChatMessage(new ChatComponentText("> Miner at " + this.xCoord + ":" + this.zCoord + " have finished mining."));
+            ChunkMinerHelpers.scanAndSaveData(getWorldObj(), getOwner());
+        }
+        if (Config.selfdestruct) {
+            getWorldObj().setBlockToAir(this.xCoord, this.yCoord, this.zCoord);
+        } else {
+            setRedstone(false);
         }
     }
 
-    private boolean doMine() {
-        Block block = this.worldObj.getBlock(this.currX, this.currY, this.currZ);
-        distributeDrop(this, block.getDrops(this.worldObj, this.currX, this.currY, this.currZ, this.worldObj.getBlockMetadata(this.currX, this.currY, this.currZ), 0));
-        this.worldObj.setBlockToAir(this.currX, this.currY, this.currZ);
-        return true;
-    }
-
-    private boolean shouldMine() {
-        return ChunkMinerHelpers.shouldMine(this.worldObj, this.currX, this.currY, this.currZ);
+    private boolean mineable(Block block) {
+        if (this.mode == 0) {
+            return ChunkMinerHelpers.genericMineable(getWorldObj(), currX, currY, currZ);
+        } else if (this.mode == 1) {
+            return ChunkMinerHelpers.mineableNonStone(block);
+        } else if (this.mode == 2) {
+            return ChunkMinerHelpers.mineable(block);
+        } else {
+            return false;
+        }
     }
 
     private static void distributeDrop(TileEntity source, List<ItemStack> itemStacks) {
@@ -155,7 +226,7 @@ public class ChunkMinerTile extends TileEntity {
             EntityItem entityItem = new EntityItem(world, (double)x + dx, (double)y + dy, (double)z + dz, itemStack.copy());
             entityItem.delayBeforeCanPickup = 10;
             entityItem.motionX = 0;
-            entityItem.motionY = 0.15;
+            entityItem.motionY = 0.25;
             entityItem.motionZ = 0;
             world.spawnEntityInWorld(entityItem);
         }
@@ -167,9 +238,7 @@ public class ChunkMinerTile extends TileEntity {
         super.validate();
         if (Config.load_chunks && (!this.worldObj.isRemote) && (this.chunkTicket == null)) {
             ForgeChunkManager.Ticket ticket = ForgeChunkManager.requestTicket(ChunkMiner.INSTANCE, this.worldObj, ForgeChunkManager.Type.NORMAL);
-            if (ticket != null) {
-                forceChunkLoading(ticket);
-            }
+            if (ticket != null) forceChunkLoading(ticket);
         }
     }
 
@@ -197,6 +266,26 @@ public class ChunkMinerTile extends TileEntity {
             ForgeChunkManager.releaseTicket(this.chunkTicket);
             this.chunkTicket = null;
         }
+    }
+
+    @Override
+    public void writeToNBT(NBTTagCompound compound) {
+        super.writeToNBT(compound);
+        compound.setInteger("currX", this.currX);
+        compound.setInteger("currY", this.currY);
+        compound.setInteger("currZ", this.currZ);
+        compound.setInteger("mode", this.mode);
+        compound.setString("owner_name", this.owner_name+"");
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound compound) {
+        super.readFromNBT(compound);
+        this.currX = compound.getInteger("currX");
+        this.currY = compound.getInteger("currY");
+        this.currZ = compound.getInteger("currZ");
+        this.mode = compound.getInteger("mode");
+        this.owner_name = compound.getString("owner_name");
     }
 
 //    @Override

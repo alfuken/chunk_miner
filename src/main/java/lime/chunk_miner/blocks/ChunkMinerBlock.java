@@ -8,8 +8,10 @@ import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.Direction;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
@@ -18,7 +20,7 @@ import net.minecraft.world.World;
 import java.util.Random;
 
 public class ChunkMinerBlock extends BlockContainer {
-    public ChunkMinerBlock(){
+    ChunkMinerBlock(){
         super(Material.iron);
         setCreativeTab(ChunkMiner.ctab);
         setBlockName(ChunkMiner.MODID + ".chunk_miner_block");
@@ -29,7 +31,7 @@ public class ChunkMinerBlock extends BlockContainer {
         setLightLevel(1.0F);
     }
 
-    public IIcon[] icons = new IIcon[6];
+    private IIcon[] icons = new IIcon[6];
 
     // 0-1-2-3-4-5 = D-U-F-L-B-R
     @Override
@@ -58,22 +60,50 @@ public class ChunkMinerBlock extends BlockContainer {
         int meta = MathHelper.floor_double((double)(p.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
         super.onBlockPlacedBy(w, x, y, z, p, itemStack);
         w.setBlockMetadataWithNotify(x, y, z, meta, 2); // 0=S 1=W 2=N 3=E
-    }
+        ChunkMinerTile t = (ChunkMinerTile)w.getTileEntity(x,y,z);
+        t.setOwner((EntityPlayer)p);
 
+    }
 
     public TileEntity createNewTileEntity(World w, int meta) {
         return new ChunkMinerTile();
     }
 
+    public void onBlockClicked(World w, int x, int y, int z, EntityPlayer p) {
+        if (w.isRemote) return;
+        if (p.getCurrentEquippedItem() == null) {
+            ChunkMinerTile m = ((ChunkMinerTile)w.getTileEntity(x,y,z));
+            m.nextMode();
+            String text = "everything! (Mines twice as fast)";
+            if (m.mode == 0) text = "only ore.";
+            if (m.mode == 1) text = "everything except stone.";
+            p.addChatMessage(new ChatComponentText("Miner set to mine " + text));
+        }
+    }
+
     public boolean onBlockActivated(World w, int x, int y, int z, EntityPlayer p, int side, float xOffset, float yOffset, float zOffset) {
         if (w.isRemote) return false;
-        if (p.getCurrentEquippedItem() != null) ((ChunkMinerTile)w.getTileEntity(x,y,z)).statusReport(p);
-        return ((ChunkMinerTile)w.getTileEntity(x,y,z)).onUse();
+        ChunkMinerTile m = ((ChunkMinerTile)w.getTileEntity(x,y,z));
+        if (p.getCurrentEquippedItem() == null) {
+            if (p.isSneaking()) {
+                m.statusReport(p);
+            } else {
+                m.onUse();
+                return true;
+            }
+        } else if (p.getCurrentEquippedItem().getItem() == Items.stick) {
+            m.nextMode();
+            String text = "everything! (Mines twice as fast)";
+            if (m.mode == 0) text = "only ore.";
+            if (m.mode == 1) text = "everything except stone.";
+            p.addChatMessage(new ChatComponentText("Miner set to mine " + text));
+        }
+        return false;
     }
 
     public void onNeighborBlockChange(World w, int x, int y, int z, Block block) {
         if (w.isRemote) return;
-        ChunkMinerBlock.updateRSStatus(w, x,y,z);
+        updateRSStatus(w, x,y,z);
     }
 
     public static void updateRSStatus(World w, int x, int y, int z){

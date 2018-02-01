@@ -2,6 +2,7 @@ package lime.chunk_miner.events;
 
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import lime.chunk_miner.ChunkMinerHelpers;
 import lime.chunk_miner.items.AreaScanner;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -17,7 +18,8 @@ public class EnteringChunkEventHandler {
             if (itemStack != null){
                 Item item = itemStack.getItem();
                 if (item instanceof AreaScanner && (item.getDamage(itemStack) > 0)){
-                    AreaScanner.scanAndSaveData(itemStack, player.getEntityWorld(), player);
+                    ChunkMinerHelpers.scanAndSaveData(itemStack, player.getEntityWorld(), player, 2);
+                    itemStack.damageItem(1, player);
                 }
             }
         }

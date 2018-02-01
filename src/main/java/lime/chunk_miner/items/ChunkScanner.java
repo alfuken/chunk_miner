@@ -19,17 +19,20 @@ public class ChunkScanner extends Item {
     }
 
     public ItemStack onItemRightClick(ItemStack itemStack, World w, EntityPlayer p) {
-        if (w.isRemote){return itemStack;}
-
-        if (Loader.isModLoaded("gregtech") && Config.inform_gt_chunks && ChunkMinerHelpers.isGtChunk((int)p.posX, (int)p.posZ)){
-            p.addChatMessage(new ChatComponentText("GT Vein chunk detected."));
+        if (w.isRemote){
+            w.playSoundAtEntity(p, "IC2:tools.ODScanner", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
+            return itemStack;
         }
+
+//        if (Loader.isModLoaded("gregtech") && Config.inform_gt_chunks && ChunkMinerHelpers.isGtChunk((int)p.posX, (int)p.posZ)){
+//            p.addChatMessage(new ChatComponentText("GT chunk detected."));
+//        }
+
+        ChunkMinerHelpers.scanAndSaveData(itemStack, w, p);
 
         p.addChatMessage(new ChatComponentText(chunkScanReportAsString(w, p)));
 
         if (!p.capabilities.isCreativeMode) --itemStack.stackSize;
-
-        w.playSoundAtEntity(p, "IC2:tools.ODScanner", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
 
         return itemStack;
     }

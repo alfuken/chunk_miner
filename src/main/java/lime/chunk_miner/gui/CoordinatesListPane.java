@@ -1,14 +1,10 @@
 package lime.chunk_miner.gui;
 
 import gminers.glasspane.GlassPane;
-import gminers.glasspane.HorzAlignment;
-import gminers.glasspane.VertAlignment;
-import gminers.glasspane.component.PaneImage;
 import gminers.glasspane.component.PaneScrollPanel;
 import gminers.glasspane.component.button.PaneButton;
 import gminers.glasspane.component.text.PaneLabel;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ResourceLocation;
 
 import java.util.*;
 

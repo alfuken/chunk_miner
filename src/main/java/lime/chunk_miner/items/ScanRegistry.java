@@ -20,7 +20,7 @@ public class ScanRegistry extends Item {
     public ItemStack onItemRightClick(ItemStack itemStack, World w, EntityPlayer player) {
         if (w.isRemote){return itemStack;}
 
-        new OreListPane(player, loadScanDataOre(player), loadScanDataOil(player)).show();
+        new lime.chunk_miner.gui.OreListPane(player, loadScanDataOre(player), loadScanDataOil(player)).show();
 
         return itemStack;
     }
