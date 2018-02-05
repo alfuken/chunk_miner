@@ -6,7 +6,12 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import cpw.mods.fml.relauncher.Side;
 import lime.chunk_miner.items.ModItems;
+import lime.chunk_miner.network.OpenScanRegistryMessage;
+import lime.chunk_miner.network.ScanReportMessage;
 import lime.chunk_miner.proxy.CommonProxy;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -22,6 +27,7 @@ public class ChunkMiner {
     public static final String DEPENDENCIES = "required-after:IC2";
     public static Logger logger;
     public static Configuration config;
+    public static SimpleNetworkWrapper network;
 
     @Mod.Instance
     public static ChunkMiner INSTANCE = new ChunkMiner();
@@ -38,6 +44,9 @@ public class ChunkMiner {
     @EventHandler
     public void preInit(FMLPreInitializationEvent e) {
         proxy.preInit(e);
+        network = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
+        network.registerMessage(ScanReportMessage.Handler.class,       ScanReportMessage.class,       0, Side.CLIENT);
+        network.registerMessage(OpenScanRegistryMessage.Handler.class, OpenScanRegistryMessage.class, 1, Side.CLIENT);
     }
 
     @EventHandler

@@ -2,33 +2,32 @@ package lime.chunk_miner.gui;
 
 import gminers.glasspane.GlassPane;
 import gminers.glasspane.component.PaneScrollPanel;
-import gminers.glasspane.component.button.PaneButton;
 import gminers.glasspane.component.text.PaneLabel;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.*;
 
-import static lime.chunk_miner.ChunkMinerHelpers.getScanDataCoordsByName;
+import static lime.chunk_miner.ChunkMinerHelpers.getScanDataCoordsByOilName;
 
 public class OilListPane extends GlassPane {
-    private Map<String, HashSet<String>> prepare_data(Map<String, String> data){
+    private Map<String, HashSet<String>> prepare_data(Map<String, NBTTagCompound> data){
         Map<String, HashSet<String>> res = new HashMap<String, HashSet<String>>();
 
         for(String coords : data.keySet()){
             try {
-                String[] pair = data.get(coords).split(" x ");
-                HashSet<String> stored_amounts = res.get(pair[1]);
-                if (stored_amounts == null) stored_amounts = new HashSet<String>();
-                stored_amounts.add(pair[0]);
-                res.put(pair[1], stored_amounts);
+//                NBTTagCompound tag = data.get(coords);
+//                HashSet<String> stored_amounts = ""+tag.getInteger("fluid_amount");
+//                if (stored_amounts == null) stored_amounts = new HashSet<String>();
+//                stored_amounts.add(pair[0]);
+//                res.put(pair[1], stored_amounts);
             } catch(ArrayIndexOutOfBoundsException e) {}
         }
 
         return res;
     }
 
-    public OilListPane(final EntityPlayer player, final Map<String, String> data) {
-//        System.out.println(data.toString());
+    public OilListPane(final EntityPlayer player, final Map<String, NBTTagCompound> data) {
         setRevertAllowed(true);
         setName("OilListPane");
         setShadowbox(null);
@@ -44,9 +43,6 @@ public class OilListPane extends GlassPane {
             if (name == null) continue;
 
             PaneLabel name_label = PaneLabel.createTitleLabel(name);
-//            name_label.setAutoPositionX(true);
-//            name_label.setRelativeX(0.5D);
-//            name_label.setRelativeXOffset(-120);
             name_label.setX(30);
             name_label.setY(50+(15*line));
             name_label.setColor(0x333333);
@@ -54,7 +50,6 @@ public class OilListPane extends GlassPane {
             scroll_panel.add(name_label);
             line++;
 
-//            List<Integer> ints = new ArrayList<Integer>();
             int[] ints = new int[prepared_data.get(name).size()];
             int i = 0;
             for(String s : prepared_data.get(name)){
@@ -77,7 +72,7 @@ public class OilListPane extends GlassPane {
                 btn.registerActivationListener(new Runnable() {
                     @Override
                     public void run() {
-                        new MapPane(player, name, getScanDataCoordsByName(data, c+" x "+name)).show();
+                        new MapPane(player, name, getScanDataCoordsByOilName(data, name)).show();
                     }
                 });
                 scroll_panel.add(btn);

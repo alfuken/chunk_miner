@@ -9,14 +9,12 @@ import lime.chunk_miner.ChunkLoadingCallback;
 import lime.chunk_miner.ChunkMiner;
 import lime.chunk_miner.Config;
 import lime.chunk_miner.blocks.ModBlocks;
-import lime.chunk_miner.events.EnteringChunkEventHandler;
 import lime.chunk_miner.items.ModItems;
 import lime.chunk_miner.tiles.ModTiles;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
@@ -42,19 +40,21 @@ public class CommonProxy {
     }
 
     public void init(FMLInitializationEvent e) {
-//        MinecraftForge.EVENT_BUS.register(new EnteringChunkEventHandler());
-
         GameRegistry.addRecipe(new ItemStack(ModItems.chunk_scanner),
                 "DS",
                 "SD",
                 'S', Items.stick, 'D', Blocks.dirt
         );
 
-        GameRegistry.addRecipe(new ItemStack(ModItems.area_scanner),
-                "RRR",
-                "RAR",
-                "RRR",
-                'R', ModItems.chunk_scanner, 'A', Items.apple
+        GameRegistry.addShapelessRecipe(new ItemStack(ModItems.area_scanner),
+                ModItems.chunk_scanner,
+                Items.apple
+        );
+        GameRegistry.addShapelessRecipe(new ItemStack(ModItems.area_scanner),
+                ModItems.chunk_scanner,
+                ModItems.chunk_scanner,
+                ModItems.chunk_scanner,
+                Items.egg
         );
 
         GameRegistry.addRecipe(new ItemStack(ModItems.scan_registry),
@@ -68,7 +68,7 @@ public class CommonProxy {
                 'A', Items.apple,
                 'S', ModItems.chunk_scanner,
                 'D', Blocks.dirt,
-                'K', Items.comparator,
+                'K', Items.redstone,
                 'I', Items.stick
 
         );
@@ -80,10 +80,10 @@ public class CommonProxy {
                 'S', ModItems.chunk_scanner,
                 'L', Blocks.lever,
                 'B', Blocks.wooden_button,
-                'R', Blocks.redstone_block,
+                'R', "plateBronze",
                 'M', Ic2Items.machine.getItem(),
                 'D', Blocks.dirt,
-                'K', Items.comparator,
+                'K', Items.redstone,
                 'I', Items.stick
         ));
 

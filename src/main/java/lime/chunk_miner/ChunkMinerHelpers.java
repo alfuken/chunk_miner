@@ -10,128 +10,107 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidBlock;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
+import static lime.chunk_miner.ChunkMinerHelpers.scanDataNBTToMap;
+
 public class ChunkMinerHelpers {
+    public static final String PLAYER_SCAN_DATA_KEY = "scan_data";
 
-    public static void scanAndSaveData(ItemStack itemStack, World w, EntityPlayer player){
-        scanAndSaveData(itemStack, w, player, 0);
+    public static void saveScanData(EntityPlayer player, NBTTagCompound scan_data){
+        saveScanData(player, scanDataNBTToMap(scan_data));
     }
 
-    public static void scanAndSaveData(ItemStack itemStack, World w, EntityPlayer player, int radius){
-//        saveScanData(player, "ore_scan_data", areaScanReportOre(w, (int)player.posX, (int)player.posZ, radius));
-
-//        if (Loader.isModLoaded("gregtech")) {
-//            saveScanData(player, "oil_scan_data", areaScanReportOil(w, (int) player.posX, (int) player.posZ, radius));
-//        }
-
-//        itemStack.damageItem(1, player);
-    }
-
-    public static void scanAndSaveData(World w, EntityPlayer player){
-        scanAndSaveData(w, player, 0);
-    }
-
-    public static void scanAndSaveData(World w, EntityPlayer player, int radius){
-//        saveScanData(player, "ore_scan_data", areaScanReportOre(w, (int)player.posX, (int)player.posZ, radius));
-//
-//        if (Loader.isModLoaded("gregtech")) {
-//            saveScanData(player, "oil_scan_data", areaScanReportOil(w, (int) player.posX, (int) player.posZ, radius));
-//        }
-    }
-
-    public static Map<String, String> areaScanReportOre(World w, int wx, int wz, int radius) {
-        return areaScanReport(w, wx, wz, radius, true);
-    }
-
-    public static Map<String, String> areaScanReportOil(World w, int wx, int wz, int radius) {
-        return areaScanReport(w, wx, wz, radius, false);
-    }
-
-    public static Map<String, String> areaScanReport(World w, int wx, int wz, int radius, boolean ore) {
-//        long startTime = System.currentTimeMillis();
-
-        Map<String, String> coord_list = new HashMap<String, String>();
-        Chunk c = w.getChunkFromBlockCoords(wx, wz);
-
-        for (int x = c.xPosition-radius; x <= c.xPosition+radius; x++) {
-            for (int z = c.zPosition-radius; z <= c.zPosition+radius; z++) {
-                if (ore){
-                    try {
-                        Map<String, Integer> ores = scanChunk(c);
-                        Map.Entry<String, Integer> most_common = ores.entrySet().iterator().next();
-                        String ore_name = most_common.getKey();
-                        coord_list.put(x+":"+z, ore_name);
-                    } catch (NoSuchElementException e){}
-                } else { // oil
-                    if (Loader.isModLoaded("gregtech")){
-                        FluidStack fluid = GT_UndergroundOil.undergroundOil(w.getChunkFromChunkCoords(x, z), -1.0F);
-                        if (fluid != null){
-                            coord_list.put(x+":"+z, fluid.amount+" x "+fluid.getLocalizedName());
-//                          if (fluid.amount >= 5000) coord_list.put(x+":"+z, fluid.amount/1000+" x "+fluid.getLocalizedName());
-                        }
-                    }
-                }
-            }
-        }
-
-//        long endTime = System.currentTimeMillis();
-//        long duration = (endTime - startTime);
-//        System.out.println("\n===> areaScanReport2(w, "+cx+", "+cz+", "+radius+", "+ore+") took "+duration+"ms");
-
-        return coord_list;
-    }
-
-
-    public static void saveScanData(EntityPlayer player, String storage_key, Map<String, String> scan_data){
-        NBTTagCompound stored_scan_data = player.getEntityData().getCompoundTag(storage_key);
+    public static void saveScanData(EntityPlayer player, Map<String, NBTTagCompound> scan_data){
+        NBTTagCompound stored_scan_data = player.getEntityData().getCompoundTag(PLAYER_SCAN_DATA_KEY);
         if (stored_scan_data == null) stored_scan_data = new NBTTagCompound();
 
         for (String coord : scan_data.keySet()) {
-            stored_scan_data.setTag(coord, new NBTTagString(scan_data.get(coord)));
+            stored_scan_data.setTag(coord, scan_data.get(coord));
         }
 
-        player.getEntityData().setTag(storage_key, stored_scan_data);
+        player.getEntityData().setTag(PLAYER_SCAN_DATA_KEY, stored_scan_data);
     }
 
-    public static Map<String, String> loadScanDataOre(EntityPlayer player) {
-        return loadScanData(player, "ore_scan_data");
+    public static NBTTagCompound scanDataMapToNBT(Map<String, NBTTagCompound> data){
+        NBTTagCompound ret = new NBTTagCompound();
+        for (String coord : data.keySet()) {
+            ret.setTag(coord, data.get(coord));
+        }
+        return ret;
     }
 
-    public static Map<String, String> loadScanDataOil(EntityPlayer player) {
-        return loadScanData(player, "oil_scan_data");
+    public static Map<String, NBTTagCompound> scanDataNBTToMap(EntityPlayer player) {
+        return scanDataNBTToMap(loadScanDataAsNBT(player));
     }
 
-    public static Map<String, String> loadScanData(EntityPlayer player, String storage_key) {
-        NBTTagCompound stored_scan_data = player.getEntityData().getCompoundTag(storage_key);
-        if (stored_scan_data == null) stored_scan_data = new NBTTagCompound();
+    public static Map<String, NBTTagCompound> scanDataNBTToMap(NBTTagCompound data) {
+        String coord;
 
-        Map<String, String> results = new HashMap<String, String>();
+        Map<String, NBTTagCompound> ret = new HashMap<String, NBTTagCompound>();
 
-        for (Object _coord : stored_scan_data.func_150296_c()) {
-            String coord = (String)_coord;
-            results.put(coord, stored_scan_data.getString(coord));
+        if (data == null) return ret;
+
+        for (Object _coord : data.func_150296_c()) {
+            coord = (String)_coord;
+            ret.put(coord, data.getCompoundTag(coord));
         }
 
-        return results;
+        return ret;
     }
 
-    public static String[] getScanDataNames(Map<String, String> data){
-        Collection<String> vals = data.values();
+    public static NBTTagCompound loadScanDataAsNBT(EntityPlayer player) {
+        NBTTagCompound tag = player.getEntityData().getCompoundTag(PLAYER_SCAN_DATA_KEY);
+        if (tag == null) tag = new NBTTagCompound();
+        return tag;
+    }
+
+    public static String[] getScanDataNames(Map<String, NBTTagCompound> data){
+        Collection<String> vals = new ArrayList<String>();
+        for(NBTTagCompound entry : data.values()){
+            vals.add(ItemStack.loadItemStackFromNBT(entry.getCompoundTag("item")).getDisplayName());
+        }
         return new TreeSet<String>(vals).toArray(new String[vals.size()]);
     }
 
-    public static String[] getScanDataCoordsByName(Map<String, String> data, String name){
+    public static String[] getScanDataOilNames(Map<String, NBTTagCompound> data){
+        Collection<String> vals = new ArrayList<String>();
+        for(NBTTagCompound entry : data.values()){
+            FluidStack fluid = FluidStack.loadFluidStackFromNBT(entry.getCompoundTag("fluid"));
+            if (fluid != null){
+                vals.add(fluid.getLocalizedName());
+            }
+        }
+        return new TreeSet<String>(vals).toArray(new String[vals.size()]);
+    }
+
+    public static String[] getScanDataCoordsByName(Map<String, NBTTagCompound> haystack, String needle){
         List<String> coords = new ArrayList<String>();
-        for (Map.Entry<String, String> entry : data.entrySet()){
-            if (entry.getValue().equals(name)) coords.add(entry.getKey());
+        for (Map.Entry<String, NBTTagCompound> entry : haystack.entrySet()){
+            if (ItemStack.loadItemStackFromNBT(entry.getValue().getCompoundTag("item")).getDisplayName().equals(needle)){
+                coords.add(entry.getKey());
+            }
+        }
+        return coords.toArray(new String[coords.size()]);
+    }
+
+    public static String[] getScanDataCoordsByOilName(Map<String, NBTTagCompound> haystack, String needle){
+        List<String> coords = new ArrayList<String>();
+        for (Map.Entry<String, NBTTagCompound> entry : haystack.entrySet()){
+            NBTTagCompound tag = entry.getValue();
+            if (tag.hasKey("fluid")) {
+                FluidStack fluid = FluidStack.loadFluidStackFromNBT(tag.getCompoundTag("fluid"));
+                if (fluid != null && fluid.getLocalizedName().equals(needle)){
+                    coords.add(entry.getKey());
+                }
+            }
+
         }
         return coords.toArray(new String[coords.size()]);
     }
@@ -189,29 +168,100 @@ public class ChunkMinerHelpers {
         return (block.getUnlocalizedName().contains("ore"));
     }
 
-    public static List<String> chunkScanReportAsList(World w, EntityPlayer p){
-        Map<String, Integer> ores = scanChunk(w.getChunkFromBlockCoords((int)p.posX, (int)p.posZ));
+    public static NBTTagCompound areaScanAsNBT(World w, int x, int z) {
+        return scanDataMapToNBT(areaScanAsMap(w, x, z));
+    }
 
-        ArrayList<String> rows = new ArrayList<String>();
-        rows.add("Resources at (" + (int) p.posX + ":" + (int) p.posZ + ")");
-        for (Map.Entry<String, Integer> entry : ores.entrySet()) {
-            rows.add(entry.getValue()+" "+entry.getKey());
+    public static NBTTagCompound areaScanAsNBT(World w, int x, int z, int radius) {
+        return scanDataMapToNBT(areaScanAsMap(w, x, z, radius));
+    }
+
+    public static Map<String, NBTTagCompound> areaScanAsMap(World w, int wx, int wz) {
+        return areaScanAsMap(w, wx, wz, 0);
+    }
+
+    public static Map<String, NBTTagCompound> areaScanAsMap(World w, int wx, int wz, int radius) {
+        Map<String, NBTTagCompound> coord_list = new HashMap<String, NBTTagCompound>();
+        Chunk c = w.getChunkFromBlockCoords(wx, wz);
+        NBTTagCompound entry;
+
+        for (int x = c.xPosition-radius; x <= c.xPosition+radius; x++) {
+            for (int z = c.zPosition-radius; z <= c.zPosition+radius; z++) {
+                try {
+                    Map.Entry<ItemStack, Integer> most_common = scanChunk(c).entrySet().iterator().next();
+                    entry = packPairEntryToNBT(most_common);
+                    addFluidInfoToTag(entry, w, x, z);
+                    coord_list.put(x+":"+z, entry);
+                } catch (NoSuchElementException e){}
+            }
         }
 
+        return coord_list;
+    }
+
+    private static NBTTagCompound addFluidInfoToTag(NBTTagCompound tag, World w, int x, int z){
         if (Loader.isModLoaded("gregtech")){
-            FluidStack fluid = GT_UndergroundOil.undergroundOil(w.getChunkFromChunkCoords(p.chunkCoordX, p.chunkCoordZ), -1.0F);
-            if (fluid != null){
-                rows.add(fluid.amount+" x "+fluid.getLocalizedName());
+            FluidStack fluidStack = GT_UndergroundOil.undergroundOil(w.getChunkFromChunkCoords(x, z), -1.0F);
+            if (fluidStack != null){
+                tag.setInteger("fluid_amount", fluidStack.amount);
+                NBTTagCompound fluid_tag = new NBTTagCompound();
+                fluidStack.writeToNBT(fluid_tag);
+                tag.setTag("fluid", fluid_tag);
             }
-//            FluidStack fluid = GT_Utility.getUndergroundOil(w, (int)p.posX, (int)p.posZ);
-//            if (fluid.amount > 0) rows.add(fluid.amount/1000+" "+fluid.getLocalizedName());
+        }
+        return tag;
+    }
+
+    private static NBTTagCompound packPairEntryToNBT(Map.Entry<ItemStack, Integer> entry){
+        NBTTagCompound row = new NBTTagCompound();
+        NBTTagCompound item = new NBTTagCompound();
+        entry.getKey().writeToNBT(item);
+        row.setTag("item", item);
+        row.setInteger("count", entry.getValue());
+        return row;
+    }
+
+    public static NBTTagCompound chunkScanAsNBT(World w, EntityPlayer p){
+        NBTTagCompound ret = new NBTTagCompound();
+
+        Map<ItemStack, Integer> ores = scanChunk(w.getChunkFromBlockCoords((int)p.posX, (int)p.posZ));
+
+        NBTTagList ore_list = new NBTTagList();
+        for (Map.Entry<ItemStack, Integer> entry : ores.entrySet()) {
+            ore_list.appendTag(packPairEntryToNBT(entry));
+        }
+        ret.setTag("ore_list", ore_list);
+
+        addFluidInfoToTag(ret, w, p.chunkCoordX, p.chunkCoordZ);
+
+        ret.setInteger("x", (int)p.posX);
+        ret.setInteger("z", (int)p.posZ);
+        return ret;
+    }
+
+    public static ArrayList<String> chunkScanFromNBT(NBTTagCompound tag){
+        ArrayList<String> rows = new ArrayList<String>();
+        rows.add("Resources at (" + tag.getInteger("x") + ":" + tag.getInteger("z") + "):");
+
+        NBTTagList list = tag.getTagList("ore_list", 10);
+        for (int i = 0; i < list.tagCount(); i++) {
+            NBTTagCompound row = list.getCompoundTagAt(i);
+            ItemStack itemStack = ItemStack.loadItemStackFromNBT(row.getCompoundTag("item"));
+            if (itemStack != null){
+                if (!skipPoory(itemStack.getDisplayName())) {
+                    rows.add(" "+row.getInteger("count")+" x "+itemStack.getDisplayName());
+                }
+            }
+        }
+
+        if (tag.hasKey("fluid")) {
+            FluidStack fluid = FluidStack.loadFluidStackFromNBT(tag.getCompoundTag("fluid"));
+            if (fluid != null){
+                rows.add(" "+tag.getInteger("fluid_amount")+" x "+fluid.getLocalizedName());
+            }
         }
 
         return rows;
-    }
-
-    public static String chunkScanReportAsString(World w, EntityPlayer p){
-        return StringUtils.join(chunkScanReportAsList(w, p), " - ");
     }
 
     public static boolean trashBlock(Block block){
@@ -245,9 +295,10 @@ public class ChunkMinerHelpers {
         }
     }
 
-    public static Map<String, Integer> scanChunk(Chunk c) {
-        Map<String, Integer> scanResults = new HashMap();
+    public static Map<ItemStack, Integer> scanChunk(Chunk c) {
+        Map<ItemStack, Integer> scanResults = new HashMap<ItemStack, Integer>();
         int meta;
+        boolean already_in_set;
         Block block;
         World w = c.worldObj;
 
@@ -259,14 +310,16 @@ public class ChunkMinerHelpers {
                     block = w.getBlock(x, y, z);
                     meta = w.getBlockMetadata(x, y, z);
                     for (ItemStack drop : block.getDrops(w, x, y, z, meta, 0)) {
-                        String key = drop.getItem().getItemStackDisplayName(drop);
+                        already_in_set = false;
 
-                        if (skipPoory(key)) continue;
+                        for (Map.Entry<ItemStack, Integer> entry : scanResults.entrySet()) {
+                            if (ItemStack.areItemStacksEqual(entry.getKey(), drop)){
+                                entry.setValue(entry.getValue() + 1);
+                                already_in_set = true;
+                            }
+                        }
 
-                        Integer count = scanResults.get(key);
-                        if (count == null) count = 0;
-                        count += 1;
-                        scanResults.put(key, count);
+                        if (!already_in_set) scanResults.put(drop, 1);
                     }
                 }
             }
