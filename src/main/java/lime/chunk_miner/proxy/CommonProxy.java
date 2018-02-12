@@ -3,6 +3,7 @@ package lime.chunk_miner.proxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ic2.core.Ic2Items;
 import lime.chunk_miner.ChunkLoadingCallback;
@@ -11,6 +12,7 @@ import lime.chunk_miner.Config;
 import lime.chunk_miner.blocks.ModBlocks;
 import lime.chunk_miner.items.ModItems;
 import lime.chunk_miner.tiles.ModTiles;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -94,5 +96,9 @@ public class CommonProxy {
         if (config.hasChanged()) {
             config.save();
         }
+    }
+
+    public EntityPlayer getPlayer(MessageContext ctx){
+        return ctx.getServerHandler().playerEntity;
     }
 }

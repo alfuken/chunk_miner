@@ -6,9 +6,11 @@ import ic2.api.recipe.IRecipeInput;
 import ic2.core.IC2;
 import lime.chunk_miner.blocks.ChunkMinerBlock;
 import net.minecraft.block.*;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
@@ -16,38 +18,75 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidBlock;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
-import static lime.chunk_miner.ChunkMinerHelpers.scanDataNBTToMap;
-
 public class ChunkMinerHelpers {
-    public static final String PLAYER_SCAN_DATA_KEY = "scan_data";
+    public static File playerFile(EntityPlayer player){
+        return new File(ChunkMiner.MODID+File.separator+ Minecraft.getMinecraft()+player.getDisplayName()+".dat");
+    }
+
+    public static NBTTagCompound readPlayer(EntityPlayer player){
+        NBTTagCompound tag = new NBTTagCompound();
+
+        try {
+            tag = CompressedStreamTools.read(playerFile(player));
+        } catch (IOException io){
+            io.printStackTrace();
+        }
+
+        return tag;
+    }
+
+    public static void writePlayer(EntityPlayer player, NBTTagCompound tag){
+        File f = playerFile(player);
+
+        if (!f.exists()){
+            try {
+                f.getParentFile().mkdirs();
+                f.createNewFile();
+            } catch (IOException io){
+                io.printStackTrace();
+            }
+        }
+
+        try {
+            CompressedStreamTools.write(tag, f);
+        } catch (IOException io){
+            io.printStackTrace();
+        }
+    }
+
+    public static void clearScanData(EntityPlayer player) {
+        writePlayer(player, new NBTTagCompound());
+    }
 
     public static void saveScanData(EntityPlayer player, NBTTagCompound scan_data){
         saveScanData(player, scanDataNBTToMap(scan_data));
     }
 
     public static void saveScanData(EntityPlayer player, Map<String, NBTTagCompound> scan_data){
-        NBTTagCompound stored_scan_data = player.getEntityData().getCompoundTag(PLAYER_SCAN_DATA_KEY);
+        NBTTagCompound stored_scan_data = readPlayer(player);
         if (stored_scan_data == null) stored_scan_data = new NBTTagCompound();
 
-        for (String coord : scan_data.keySet()) {
-            stored_scan_data.setTag(coord, scan_data.get(coord));
+        for (Map.Entry<String, NBTTagCompound> entry : scan_data.entrySet()){
+            stored_scan_data.setTag(entry.getKey(), entry.getValue());
         }
 
-        player.getEntityData().setTag(PLAYER_SCAN_DATA_KEY, stored_scan_data);
+        writePlayer(player, stored_scan_data);
     }
 
     public static NBTTagCompound scanDataMapToNBT(Map<String, NBTTagCompound> data){
         NBTTagCompound ret = new NBTTagCompound();
-        for (String coord : data.keySet()) {
-            ret.setTag(coord, data.get(coord));
+        for (Map.Entry<String, NBTTagCompound> entry : data.entrySet()){
+            ret.setTag(entry.getKey(), entry.getValue());
         }
         return ret;
     }
 
     public static Map<String, NBTTagCompound> scanDataNBTToMap(EntityPlayer player) {
-        return scanDataNBTToMap(loadScanDataAsNBT(player));
+        return scanDataNBTToMap(readPlayer(player));
     }
 
     public static Map<String, NBTTagCompound> scanDataNBTToMap(NBTTagCompound data) {
@@ -63,12 +102,6 @@ public class ChunkMinerHelpers {
         }
 
         return ret;
-    }
-
-    public static NBTTagCompound loadScanDataAsNBT(EntityPlayer player) {
-        NBTTagCompound tag = player.getEntityData().getCompoundTag(PLAYER_SCAN_DATA_KEY);
-        if (tag == null) tag = new NBTTagCompound();
-        return tag;
     }
 
     public static String[] getScanDataNames(Map<String, NBTTagCompound> data){
@@ -88,6 +121,16 @@ public class ChunkMinerHelpers {
             }
         }
         return new TreeSet<String>(vals).toArray(new String[vals.size()]);
+    }
+
+    public static List<NBTTagCompound> getScanDataByName(Map<String, NBTTagCompound> haystack, String needle){
+        List<NBTTagCompound> coords = new ArrayList<NBTTagCompound>();
+        for (Map.Entry<String, NBTTagCompound> entry : haystack.entrySet()){
+            if (ItemStack.loadItemStackFromNBT(entry.getValue().getCompoundTag("item")).getDisplayName().equals(needle)){
+                coords.add(entry.getValue());
+            }
+        }
+        return coords;
     }
 
     public static String[] getScanDataCoordsByName(Map<String, NBTTagCompound> haystack, String needle){
@@ -183,12 +226,14 @@ public class ChunkMinerHelpers {
     public static Map<String, NBTTagCompound> areaScanAsMap(World w, int wx, int wz, int radius) {
         Map<String, NBTTagCompound> coord_list = new HashMap<String, NBTTagCompound>();
         Chunk c = w.getChunkFromBlockCoords(wx, wz);
+        Chunk chunk;
         NBTTagCompound entry;
 
         for (int x = c.xPosition-radius; x <= c.xPosition+radius; x++) {
             for (int z = c.zPosition-radius; z <= c.zPosition+radius; z++) {
                 try {
-                    Map.Entry<ItemStack, Integer> most_common = scanChunk(c).entrySet().iterator().next();
+                    chunk = w.getChunkFromChunkCoords(x, z);
+                    Map.Entry<ItemStack, Integer> most_common = scanChunk(chunk).entrySet().iterator().next();
                     entry = packPairEntryToNBT(most_common);
                     addFluidInfoToTag(entry, w, x, z);
                     coord_list.put(x+":"+z, entry);

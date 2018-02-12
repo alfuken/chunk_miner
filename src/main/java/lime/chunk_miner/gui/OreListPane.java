@@ -14,7 +14,7 @@ import static lime.chunk_miner.ChunkMinerHelpers.getScanDataCoordsByName;
 import static lime.chunk_miner.ChunkMinerHelpers.getScanDataNames;
 
 public class OreListPane extends GlassPane {
-    public OreListPane(final EntityClientPlayerMP player, final Map<String, NBTTagCompound> data){
+    public OreListPane(final EntityPlayer player, final Map<String, NBTTagCompound> data){
         setName("OreListPane");
         setShadowbox(null);
 
@@ -32,7 +32,7 @@ public class OreListPane extends GlassPane {
             oil.registerActivationListener(new Runnable() {
                 @Override
                 public void run() {
-                    new OilListPane((EntityPlayer)player, data).show();
+                    new OilListPane(player, data).show();
                 }
             });
             add(oil);
@@ -46,8 +46,8 @@ public class OreListPane extends GlassPane {
                 ClickablePaneLabel btn = GuiHelpers.clickable_label(name, i, new Runnable() {
                     @Override
                     public void run() {
-                        new MapPane((EntityPlayer)player, name, getScanDataCoordsByName(data, name)).show();
-//                        new CoordinatesListPane(player, name, getScanDataCoordsByTag(data, name)).show();
+                        new MapPane(player, name, getScanDataCoordsByName(data, name)).show();
+//                      new CoordinatesListPane(player, name, getScanDataCoordsByTag(data, name)).show();
                     }
                 });
                 scroll_panel.add(btn);

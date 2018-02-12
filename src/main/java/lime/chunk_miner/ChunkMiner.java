@@ -10,7 +10,9 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 import lime.chunk_miner.items.ModItems;
+import lime.chunk_miner.network.ClearScanDataMessage;
 import lime.chunk_miner.network.OpenScanRegistryMessage;
+import lime.chunk_miner.network.SaveReportMessage;
 import lime.chunk_miner.network.ScanReportMessage;
 import lime.chunk_miner.proxy.CommonProxy;
 import net.minecraft.creativetab.CreativeTabs;
@@ -44,9 +46,13 @@ public class ChunkMiner {
     @EventHandler
     public void preInit(FMLPreInitializationEvent e) {
         proxy.preInit(e);
+
+        int n = 0;
         network = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
-        network.registerMessage(ScanReportMessage.Handler.class,       ScanReportMessage.class,       0, Side.CLIENT);
-        network.registerMessage(OpenScanRegistryMessage.Handler.class, OpenScanRegistryMessage.class, 1, Side.CLIENT);
+        network.registerMessage(ScanReportMessage.Handler.class,       ScanReportMessage.class,       n++, Side.CLIENT);
+        network.registerMessage(OpenScanRegistryMessage.Handler.class, OpenScanRegistryMessage.class, n++, Side.CLIENT);
+        network.registerMessage(SaveReportMessage.Handler.class,       SaveReportMessage.class,       n++, Side.CLIENT);
+        network.registerMessage(ClearScanDataMessage.Handler.class,    ClearScanDataMessage.class,    n++, Side.CLIENT);
     }
 
     @EventHandler

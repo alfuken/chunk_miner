@@ -5,9 +5,9 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
+import lime.chunk_miner.ChunkMiner;
 import lime.chunk_miner.ChunkMinerHelpers;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentText;
 
@@ -30,8 +30,8 @@ public class ScanReportMessage implements IMessage {
 
         @Override
         public IMessage onMessage(ScanReportMessage message, MessageContext ctx) {
-            if (ctx.side.isClient()){
-                EntityClientPlayerMP p = Minecraft.getMinecraft().thePlayer;
+            if (ctx.side.isClient() && message.payload != null){
+                EntityPlayer p = ChunkMiner.proxy.getPlayer(ctx);
                 int n = 0;
                 for(String row : ChunkMinerHelpers.chunkScanFromNBT(message.payload)){
                     p.addChatMessage(new ChatComponentText(row));
