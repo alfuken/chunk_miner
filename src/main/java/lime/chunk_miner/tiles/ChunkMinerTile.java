@@ -4,7 +4,7 @@ import lime.chunk_miner.ChunkMiner;
 import lime.chunk_miner.ChunkMinerHelpers;
 import lime.chunk_miner.Config;
 import lime.chunk_miner.blocks.ChunkMinerBlock;
-import lime.chunk_miner.network.SaveReportMessage;
+import lime.chunk_miner.network.SaveChunkScanReportMessage;
 import net.minecraft.block.*;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,12 +21,8 @@ import net.minecraftforge.fluids.IFluidBlock;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import static ic2.core.util.StackUtil.distribute;
-import static lime.chunk_miner.ChunkMinerHelpers.areaScanAsMap;
-import static lime.chunk_miner.ChunkMinerHelpers.areaScanAsNBT;
-import static lime.chunk_miner.ChunkMinerHelpers.scanDataMapToNBT;
 
 public class ChunkMinerTile extends TileEntity {
     private int update_cooldown = 20;
@@ -179,8 +175,9 @@ public class ChunkMinerTile extends TileEntity {
         if (getOwner() != null) {
             getOwner().addChatMessage(new ChatComponentText("> Miner at " + this.xCoord + ":" + this.zCoord + " have finished mining."));
 
-            NBTTagCompound data = areaScanAsNBT(getWorldObj(), this.xCoord, this.zCoord);
-            ChunkMiner.network.sendTo(new SaveReportMessage(data), (EntityPlayerMP) getOwner());
+            Chunk c = this.worldObj.getChunkFromBlockCoords(this.xCoord, this.zCoord);
+            NBTTagCompound data = ChunkMinerHelpers.chunkScanResultsAsTag(c);
+            ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(data), (EntityPlayerMP) getOwner());
 
         }
         if (Config.selfdestruct) {

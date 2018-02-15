@@ -4,28 +4,13 @@ import gminers.glasspane.GlassPane;
 import gminers.glasspane.component.PaneScrollPanel;
 import gminers.glasspane.component.button.PaneButton;
 import gminers.glasspane.component.text.PaneLabel;
+import lime.chunk_miner.ScanDB;
 import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.*;
 
 public class CoordinatesListPane extends GlassPane {
-    private List<String> prepare_coords(EntityPlayer player, String[] coords){
-        Map<Double, String> new_coords = new HashMap<Double, String>();
-        for(String e : coords){
-            String[] pair = e.split(":");
-            double d = player.getDistance(Integer.parseInt(pair[0])*16, player.posY, Integer.parseInt(pair[1])*16);
-            new_coords.put(d, Integer.parseInt(pair[0])*16+":"+Integer.parseInt(pair[1])*16+" ("+e+")");
-        }
-
-        List<String> new_coords_list = new ArrayList<String>();
-        for(Double key : new TreeSet<Double>(new_coords.keySet())){
-            new_coords_list.add(key.intValue()+"   "+new_coords.get(key));
-        }
-
-        return new_coords_list;
-    }
-
-    public CoordinatesListPane(final EntityPlayer player, final String name, final String[] data){
+    public CoordinatesListPane(final EntityPlayer p, final String name){
         setRevertAllowed(true);
         setName("CoordinatesListPane");
         setShadowbox(null);
@@ -33,13 +18,12 @@ public class CoordinatesListPane extends GlassPane {
         add(GuiHelpers.book_background());
         add(GuiHelpers.back_button());
 
-        PaneScrollPanel scroll_panel = GuiHelpers.scroll_panel(name+"\nDistance & Coordinates (Chunk)");
+        PaneScrollPanel scroll_panel = GuiHelpers.scroll_panel(name+" Coordinates");
 
-            int i = 1;
-            for(String e : prepare_coords(player, data)){
-                PaneLabel label = GuiHelpers.label(e, i);
+            int i = 0;
+            for(String e : ScanDB.p(p).get(name)){
+                PaneLabel label = GuiHelpers.label(e, ++i);
                 scroll_panel.add(label);
-                i++;
             }
 
         add(scroll_panel);
@@ -54,7 +38,7 @@ public class CoordinatesListPane extends GlassPane {
         map.registerActivationListener(new Runnable() {
             @Override
             public void run() {
-                new MapPane(player, name, data).show();
+                new MapPane(p, name).show();
             }
         });
         add(map);

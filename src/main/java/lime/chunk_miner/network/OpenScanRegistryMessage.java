@@ -24,7 +24,7 @@ public class OpenScanRegistryMessage implements IMessage {
         public IMessage onMessage(OpenScanRegistryMessage message, MessageContext ctx) {
             if (ctx.side.isClient()){
                 EntityPlayer p = ChunkMiner.proxy.getPlayer(ctx);
-                new OreListPane(p, ChunkMinerHelpers.scanDataNBTToMap(p)).show();
+//                new OreListPane(p, ChunkMinerHelpers.scanDataNBTToMap(p)).show();
             }
             return null;
         }

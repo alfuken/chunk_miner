@@ -1,4 +1,4 @@
-package lime.chunk_miner;
+package lime.chunk_miner.events;
 
 import lime.chunk_miner.tiles.ChunkMinerTile;
 import net.minecraft.tileentity.TileEntity;

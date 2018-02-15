@@ -7,8 +7,10 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import lime.chunk_miner.ChunkMiner;
 import lime.chunk_miner.ChunkMinerHelpers;
+import lime.chunk_miner.ScanDB;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ChatComponentText;
 
 public class ScanReportMessage implements IMessage {
@@ -32,10 +34,14 @@ public class ScanReportMessage implements IMessage {
         public IMessage onMessage(ScanReportMessage message, MessageContext ctx) {
             if (ctx.side.isClient() && message.payload != null){
                 EntityPlayer p = ChunkMiner.proxy.getPlayer(ctx);
-                int n = 0;
-                for(String row : ChunkMinerHelpers.chunkScanFromNBT(message.payload)){
+                int x = message.payload.getInteger("x") * 16 + 8;
+                int z = message.payload.getInteger("z") * 16 + 8;
+                p.addChatMessage(new ChatComponentText("Scan of "+x+":"+z+":"));
+                NBTTagList list = message.payload.getTagList("list", message.payload.getId());
+                for (int i = 0; i < list.tagCount(); i++) {
+                    NBTTagCompound nbt = list.getCompoundTagAt(i);
+                    String row = " " + nbt.getInteger("n") + " x " + ScanDB.itemFromString(nbt.getString("item")).getDisplayName();
                     p.addChatMessage(new ChatComponentText(row));
-                    if (n++ > 5) break;
                 }
             }
             return null;

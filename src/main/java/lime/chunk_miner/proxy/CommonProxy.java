@@ -6,7 +6,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ic2.core.Ic2Items;
-import lime.chunk_miner.ChunkLoadingCallback;
+import lime.chunk_miner.events.ChunkLoadingCallback;
 import lime.chunk_miner.ChunkMiner;
 import lime.chunk_miner.Config;
 import lime.chunk_miner.blocks.ModBlocks;
@@ -17,6 +17,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 

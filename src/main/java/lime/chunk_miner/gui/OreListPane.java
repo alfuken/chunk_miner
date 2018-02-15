@@ -4,25 +4,25 @@ import cpw.mods.fml.common.Loader;
 import gminers.glasspane.GlassPane;
 import gminers.glasspane.component.PaneScrollPanel;
 import gminers.glasspane.component.button.PaneButton;
+import lime.chunk_miner.ScanDB;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.Map;
+import java.util.Objects;
 
-import static lime.chunk_miner.ChunkMinerHelpers.getScanDataCoordsByName;
-import static lime.chunk_miner.ChunkMinerHelpers.getScanDataNames;
 
 public class OreListPane extends GlassPane {
-    public OreListPane(final EntityPlayer player, final Map<String, NBTTagCompound> data){
+    public OreListPane(final EntityPlayer p){
         setName("OreListPane");
         setShadowbox(null);
 
         add(GuiHelpers.book_background());
         add(GuiHelpers.close_button());
 
-        if (Loader.isModLoaded("zzzz-gregtech")) {
-            PaneButton oil = new PaneButton("oil");
+        if (Loader.isModLoaded("gregtech")) {
+            PaneButton oil = new PaneButton("Oil");
             oil.setWidth(25);
             oil.setHeight(15);
             oil.setAutoPositionX(true);
@@ -32,7 +32,7 @@ public class OreListPane extends GlassPane {
             oil.registerActivationListener(new Runnable() {
                 @Override
                 public void run() {
-                    new OilListPane(player, data).show();
+                    new OilListPane(p).show();
                 }
             });
             add(oil);
@@ -41,17 +41,15 @@ public class OreListPane extends GlassPane {
         PaneScrollPanel scroll_panel = GuiHelpers.scroll_panel("Scan registry");
 
             int i = 0;
-            for(final String name : getScanDataNames(data)){
-                if (name == null) continue;
-                ClickablePaneLabel btn = GuiHelpers.clickable_label(name, i, new Runnable() {
+            for(final String name : ScanDB.p(p).get_ore_names()){
+                if (name == null || Objects.equals(name, "")) continue;
+                ClickablePaneLabel btn = GuiHelpers.clickable_label(name, i++, new Runnable() {
                     @Override
                     public void run() {
-                        new MapPane(player, name, getScanDataCoordsByName(data, name)).show();
-//                      new CoordinatesListPane(player, name, getScanDataCoordsByTag(data, name)).show();
+                        new MapPane(p, name).show();
                     }
                 });
                 scroll_panel.add(btn);
-                i++;
             }
 
         add(scroll_panel);
