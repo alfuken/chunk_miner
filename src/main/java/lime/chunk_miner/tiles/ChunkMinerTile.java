@@ -1,7 +1,7 @@
 package lime.chunk_miner.tiles;
 
 import lime.chunk_miner.ChunkMiner;
-import lime.chunk_miner.ChunkMinerHelpers;
+import lime.chunk_miner.Utils;
 import lime.chunk_miner.Config;
 import lime.chunk_miner.blocks.ChunkMinerBlock;
 import lime.chunk_miner.network.SaveChunkScanReportMessage;
@@ -176,7 +176,7 @@ public class ChunkMinerTile extends TileEntity {
             getOwner().addChatMessage(new ChatComponentText("> Miner at " + this.xCoord + ":" + this.zCoord + " have finished mining."));
 
             Chunk c = this.worldObj.getChunkFromBlockCoords(this.xCoord, this.zCoord);
-            NBTTagCompound data = ChunkMinerHelpers.chunkScanResultsAsTag(c);
+            NBTTagCompound data = Utils.chunkScanResultsAsTag(c);
             ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(data), (EntityPlayerMP) getOwner());
 
         }
@@ -189,11 +189,11 @@ public class ChunkMinerTile extends TileEntity {
 
     private boolean mineable(Block block) {
         if (this.mode == 0) {
-            return ChunkMinerHelpers.genericMineable(getWorldObj(), currX, currY, currZ);
+            return Utils.genericMineable(getWorldObj(), currX, currY, currZ);
         } else if (this.mode == 1) {
-            return ChunkMinerHelpers.mineableNonStone(block);
+            return Utils.mineableNonStone(block);
         } else if (this.mode == 2) {
-            return ChunkMinerHelpers.mineable(block);
+            return Utils.mineable(block);
         } else {
             return false;
         }

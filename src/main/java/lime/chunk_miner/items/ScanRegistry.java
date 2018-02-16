@@ -1,6 +1,7 @@
 package lime.chunk_miner.items;
 
 import lime.chunk_miner.ChunkMiner;
+import lime.chunk_miner.network.ClearScanDataMessage;
 import lime.chunk_miner.network.OpenScanRegistryMessage;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -18,8 +19,16 @@ public class ScanRegistry extends Item {
     public ItemStack onItemRightClick(ItemStack itemStack, World w, EntityPlayer player) {
         if (w.isRemote) return itemStack;
 
-//        new OreListPane(player).show();
-        ChunkMiner.network.sendTo(new OpenScanRegistryMessage(), (EntityPlayerMP) player);
+
+        if (player.isSneaking())
+        {
+            ChunkMiner.network.sendTo(new ClearScanDataMessage(), (EntityPlayerMP) player);
+        }
+        else
+        {
+            ChunkMiner.network.sendTo(new OpenScanRegistryMessage(), (EntityPlayerMP) player);
+        }
+
         return itemStack;
     }
 

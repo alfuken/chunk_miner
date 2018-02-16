@@ -1,7 +1,7 @@
 package lime.chunk_miner.items;
 
 import lime.chunk_miner.ChunkMiner;
-import lime.chunk_miner.ChunkMinerHelpers;
+import lime.chunk_miner.Utils;
 import lime.chunk_miner.Config;
 import lime.chunk_miner.network.SaveChunkScanReportMessage;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,14 +25,13 @@ public class AreaScanner extends Item {
     public ItemStack onItemRightClick(ItemStack itemStack, World w, EntityPlayer player) {
         if (w.isRemote) return itemStack;
 
-        List<NBTTagCompound> data = ChunkMinerHelpers.areaScanResultsAsNBTList(w, (int)player.posX, (int)player.posZ, Config.area_scan_radius);
+        List<NBTTagCompound> data = Utils.areaScanResultsAsNBTList(w, (int)player.posX, (int)player.posZ, Config.area_scan_radius);
 
         NBTTagCompound all_data = new NBTTagCompound();
         all_data.setBoolean("big_batch", true);
         NBTTagList tag_list = new NBTTagList();
         for(NBTTagCompound entry : data){
             tag_list.appendTag(entry);
-//            ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(entry), (EntityPlayerMP) player);
         }
         all_data.setTag("tag_list", tag_list);
 

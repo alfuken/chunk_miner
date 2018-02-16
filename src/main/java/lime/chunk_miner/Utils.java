@@ -8,6 +8,7 @@ import lime.chunk_miner.blocks.ChunkMinerBlock;
 import net.minecraft.block.*;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
@@ -15,9 +16,11 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidBlock;
 
+import javax.xml.bind.DatatypeConverter;
+import java.io.*;
 import java.util.*;
 
-public class ChunkMinerHelpers {
+public class Utils {
     public static boolean isGtChunk(int x, int z){
         return ((x / 16 - 1) % 3 == 0) && ((z / 16 - 1) % 3 == 0);
     }
@@ -102,7 +105,7 @@ public class ChunkMinerHelpers {
         }
     }
 
-    private static boolean shouldBeSkipped(String name){
+    public static boolean shouldBeSkipped(String name){
         for(String m : Config.ignored_materials){
             if (name.contains(m)) return true;
         }
@@ -165,9 +168,7 @@ public class ChunkMinerHelpers {
                     block = w.getBlock(x, y, z);
                     meta = w.getBlockMetadata(x, y, z);
                     for (ItemStack drop : block.getDrops(w, x, y, z, meta, 0)) {
-                        if (shouldBeSkipped(drop.getItem().getItemStackDisplayName(drop))) continue;
-
-                        String key = ScanDB.itemToString(drop);
+                        String key = itemToString(drop);
                         Integer count = ret.get(key);
                         if (count == null) count = 0;
                         ret.put(key, ++count);
@@ -179,9 +180,7 @@ public class ChunkMinerHelpers {
         if (Loader.isModLoaded("gregtech")){
             FluidStack fluidStack = GT_UndergroundOil.undergroundOil(c, -1.0F);
             if (fluidStack != null){
-                NBTTagCompound fluid_tag = new NBTTagCompound();
-                fluidStack.writeToNBT(fluid_tag);
-                String key = ScanDB.tagToString(fluid_tag);
+                String key = fluidToString(fluidStack);
                 ret.put(key, fluidStack.amount);
             }
         }
@@ -205,5 +204,64 @@ public class ChunkMinerHelpers {
             result.put( entry.getKey(), entry.getValue() );
         }
         return result;
+    }
+
+    public static boolean isFluidTag(NBTTagCompound tag){
+        return tag.hasKey("FluidName");
+    }
+
+    public static String itemToString(ItemStack item){
+        return tagToString(item.writeToNBT(new NBTTagCompound()));
+    }
+
+    public static String fluidToString(FluidStack fluid){
+        return tagToString(fluid.writeToNBT(new NBTTagCompound()));
+    }
+
+    public static String tagToString(NBTTagCompound tag){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream os = new DataOutputStream(baos);
+        try {
+            CompressedStreamTools.write(tag, os);
+            os.close();
+            baos.close();
+        } catch (IOException io){
+            io.printStackTrace(System.out);
+        }
+
+        return DatatypeConverter.printBase64Binary(baos.toByteArray());
+    }
+
+    public static ItemStack itemFromString(String s){
+        return ItemStack.loadItemStackFromNBT(tagFromString(s));
+    }
+
+    public static FluidStack fluidFromString(String s){
+        return FluidStack.loadFluidStackFromNBT(tagFromString(s));
+    }
+
+    public static NBTTagCompound tagFromString(String s){
+        NBTTagCompound tag = new NBTTagCompound();
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(s));
+        DataInputStream is = new DataInputStream(bais);
+        try {
+            tag = CompressedStreamTools.read(is);
+            is.close();
+            bais.close();
+        } catch (IOException io){
+            io.printStackTrace(System.out);
+        }
+
+        return tag;
+    }
+
+    public static String nameFromString(String str){
+        NBTTagCompound tag = tagFromString(str);
+        if (isFluidTag(tag)){
+            return FluidStack.loadFluidStackFromNBT(tag).getLocalizedName();
+        } else {
+            return ItemStack.loadItemStackFromNBT(tag).getDisplayName();
+        }
     }
 }

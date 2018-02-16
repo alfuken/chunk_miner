@@ -6,7 +6,7 @@ import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import lime.chunk_miner.ChunkMiner;
-import lime.chunk_miner.ScanDB;
+import lime.chunk_miner.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -39,7 +39,7 @@ public class ScanReportMessage implements IMessage {
                 NBTTagList list = message.payload.getTagList("list", message.payload.getId());
                 for (int i = 0; i < list.tagCount(); i++) {
                     NBTTagCompound nbt = list.getCompoundTagAt(i);
-                    String row = " " + nbt.getInteger("n") + " x " + ScanDB.nameFromString(nbt.getString("item"));
+                    String row = " " + nbt.getInteger("n") + " x " + Utils.nameFromString(nbt.getString("item"));
                     p.addChatMessage(new ChatComponentText(row));
                 }
             }

@@ -2,13 +2,7 @@ package lime.chunk_miner;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChatComponentText;
-import net.minecraftforge.fluids.FluidStack;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
@@ -19,7 +13,8 @@ import java.util.Map;
 public class ScanDB {
     private static ScanDB instance;
     private EntityPlayer player;
-    private String db_file;
+    public String db_file;
+    public long locked_at;
 
     public ScanDB(){}
     public ScanDB(EntityPlayer player){
@@ -41,74 +36,14 @@ public class ScanDB {
     }
 
     /*
-
-    =============================== STATICS ===============================
-
-     */
-    public static boolean isFluidTag(NBTTagCompound tag){
-        return tag.hasKey("FluidName");
-    }
-
-    public static String itemToString(ItemStack item){
-        return tagToString(item.writeToNBT(new NBTTagCompound()));
-    }
-
-    public static String fluidToString(FluidStack fluid){
-        return tagToString(fluid.writeToNBT(new NBTTagCompound()));
-    }
-
-    public static String tagToString(NBTTagCompound tag){
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream os = new DataOutputStream(baos);
-        try {
-            CompressedStreamTools.write(tag, os);
-            os.close();
-            baos.close();
-        } catch (IOException io){
-            io.printStackTrace(System.out);
-        }
-
-        return DatatypeConverter.printBase64Binary(baos.toByteArray());
-    }
-
-    public static ItemStack itemFromString(String s){
-        return ItemStack.loadItemStackFromNBT(tagFromString(s));
-    }
-
-    public static FluidStack fluidFromString(String s){
-        return FluidStack.loadFluidStackFromNBT(tagFromString(s));
-    }
-
-    public static NBTTagCompound tagFromString(String s){
-        NBTTagCompound tag = new NBTTagCompound();
-
-        ByteArrayInputStream bais = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(s));
-        DataInputStream is = new DataInputStream(bais);
-        try {
-            tag = CompressedStreamTools.read(is);
-            is.close();
-            bais.close();
-        } catch (IOException io){
-            io.printStackTrace(System.out);
-        }
-
-        return tag;
-    }
-
-    public static String nameFromString(String str){
-        NBTTagCompound tag = tagFromString(str);
-        if (isFluidTag(tag)){
-            return FluidStack.loadFluidStackFromNBT(tag).getLocalizedName();
-        } else {
-            return ItemStack.loadItemStackFromNBT(tag).getDisplayName();
-        }
-    }
-
-    /*
     *
     * =============================== Instance methods ===============================
     *
     * */
+
+    public void lock(){this.locked_at = System.currentTimeMillis();}
+    public void unlock(){this.locked_at = 0;}
+
     private File playerDataFile(){
         File f = new File(
             "./" + ChunkMiner.MODID + File.separator +
@@ -289,8 +224,10 @@ public class ScanDB {
         Connection        conn = null;
         PreparedStatement qry  = null;
         String            sql  = "INSERT INTO scan_registry(name, item, x, z, n, oil) VALUES(?,?,?,?,?,?);";
-        String            name = nameFromString(item);
+        String            name = Utils.nameFromString(item);
         int               oil  = 0;
+
+        if (Utils.shouldBeSkipped(name)) return;
 
         if (name.equals("Natural Gas") ||
             name.equals("Light Oil") ||

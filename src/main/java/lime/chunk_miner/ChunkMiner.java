@@ -10,6 +10,7 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 import lime.chunk_miner.items.ModItems;
+import lime.chunk_miner.network.ClearScanDataMessage;
 import lime.chunk_miner.network.OpenScanRegistryMessage;
 import lime.chunk_miner.network.SaveChunkScanReportMessage;
 import lime.chunk_miner.network.ScanReportMessage;
@@ -51,7 +52,7 @@ public class ChunkMiner {
         network.registerMessage(ScanReportMessage.Handler.class,          ScanReportMessage.class,          n++, Side.CLIENT);
         network.registerMessage(SaveChunkScanReportMessage.Handler.class, SaveChunkScanReportMessage.class, n++, Side.CLIENT);
         network.registerMessage(OpenScanRegistryMessage.Handler.class,    OpenScanRegistryMessage.class,    n++, Side.CLIENT);
-//        network.registerMessage(ClearScanDataMessage.Handler.class,       ClearScanDataMessage.class,       n++, Side.CLIENT);
+        network.registerMessage(ClearScanDataMessage.Handler.class,       ClearScanDataMessage.class,       n++, Side.CLIENT);
     }
 
     @EventHandler

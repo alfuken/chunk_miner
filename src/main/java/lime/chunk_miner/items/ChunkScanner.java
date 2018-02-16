@@ -1,7 +1,7 @@
 package lime.chunk_miner.items;
 
 import lime.chunk_miner.ChunkMiner;
-import lime.chunk_miner.ChunkMinerHelpers;
+import lime.chunk_miner.Utils;
 import lime.chunk_miner.network.SaveChunkScanReportMessage;
 import lime.chunk_miner.network.ScanReportMessage;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,7 +24,7 @@ public class ChunkScanner extends Item {
         if (w.isRemote) return itemStack;
 
         Chunk c = w.getChunkFromBlockCoords((int)p.posX, (int)p.posZ);
-        NBTTagCompound data = ChunkMinerHelpers.chunkScanResultsAsTag(c);
+        NBTTagCompound data = Utils.chunkScanResultsAsTag(c);
         ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(data), (EntityPlayerMP) p);
         ChunkMiner.network.sendTo(new ScanReportMessage(data), (EntityPlayerMP) p);
 
