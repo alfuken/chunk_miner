@@ -18,7 +18,7 @@ buildscript {
 apply plugin: 'forge'
 apply plugin: 'idea'
 
-version = "1.7.10-2"
+version = "1.7.10-3"
 group= "lime.chunk_miner" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "chunk_miner"
 

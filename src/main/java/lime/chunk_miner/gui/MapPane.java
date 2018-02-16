@@ -22,11 +22,11 @@ public class MapPane extends GlassPane {
         add(GuiHelpers.back_button());
 
         PaneButton coords_button = new PaneButton("coords");
-        coords_button.setWidth(25);
+        coords_button.setWidth(45);
         coords_button.setHeight(15);
         coords_button.setAutoPositionX(true);
         coords_button.setRelativeX(0.5D);
-        coords_button.setRelativeXOffset(100);
+        coords_button.setRelativeXOffset(90);
         coords_button.setY(15);
         coords_button.registerActivationListener(new Runnable() {
             @Override
@@ -51,7 +51,7 @@ public class MapPane extends GlassPane {
         int center_x = chunk.xPosition;
         int center_z = chunk.zPosition;
 
-        add( cell(0, 0, 0x333333, "You"));
+        add( cell(0, 0, 0xAA333333, "You"));
 
         Map<Integer, Map<Integer, Integer>> coords = ScanDB.p(p).get(name, chunk.xPosition, chunk.zPosition, 26);
 
@@ -70,7 +70,7 @@ public class MapPane extends GlassPane {
                     colour = count2colour(n);
                     label  = String.valueOf(n);
                 }
-                add(cell( x-center_x, z-center_z, colour, label));
+                add(cell(x-center_x, z-center_z, colour, label));
             }
         }
 
@@ -78,17 +78,18 @@ public class MapPane extends GlassPane {
         label.setAutoResizeWidth(true);
         label.setAlignmentX(HorzAlignment.MIDDLE);
         label.setY(45);
-        label.setColor(0x000000);
+        label.setColor(0xff000000);
         label.setShadow(false);
         add(label);
+
     }
 
     private PaneBox background_tile_light(int x, int y){
-        return background_tile(x, y, 0xE7CFB4);
+        return background_tile(x, y, 0x33FFFFFF);
     }
 
     private PaneBox background_tile_dark(int x, int y){
-        return background_tile(x, y, 0xBE915B);
+        return background_tile(x, y, 0x33000000);
     }
 
     private PaneBox background_tile(int x, int y, int colour){
@@ -99,7 +100,8 @@ public class MapPane extends GlassPane {
         box.setY((y*20)+77);
         box.setWidth(20);
         box.setHeight(20);
-        box.setZIndex(-1);
+        box.setZIndex(0);
+//        System.out.println(String.format("Adding BG box: %d:%d (%d:%d)", x, y, ((x*20)-115), ((y*20)+77)));
         return box;
     }
 
@@ -113,6 +115,8 @@ public class MapPane extends GlassPane {
         box.setY((y_offset*box_size)+185);
         box.setWidth(box_size);
         box.setHeight(box_size);
+        box.setZIndex(1);
+//        System.out.println(String.format("Cell create: %s at %d:%d (%d:%d)", label, x_offset, y_offset, ((x_offset*box_size)-7), ((y_offset*box_size)+185)));
         return box;
     }
 
@@ -124,29 +128,29 @@ public class MapPane extends GlassPane {
         401 и более: ярко-синий
     */
     private int count2colour(int n){
-        if (n >= 1 && n <= 20) return 0xe22f02;
-        else if (n >= 21 && n <= 50) return 0xff9d00;
-        else if (n >= 51 && n <= 100) return 0xffff00;
-        else if (n >= 101 && n <= 300) return 0x14d802;
-        else if (n >= 301 && n <= 500) return 0x02e6f2;
-        else if (n >= 501 && n <= 1000) return 0x0245ff;
-        else if (n > 1000) return 0xff01d0;
-        else return 0xffffff;
+        if (n >= 1 && n <= 20)          return 0xAAe22f02;
+        else if (n >= 21 && n <= 50)    return 0xAAff9d00;
+        else if (n >= 51 && n <= 100)   return 0xAAffff00;
+        else if (n >= 101 && n <= 300)  return 0xAA14d802;
+        else if (n >= 301 && n <= 500)  return 0xAA02e6f2;
+        else if (n >= 501 && n <= 1000) return 0xAA0245ff;
+        else if (n > 1000)              return 0xAAff01d0;
+        else                            return 0xAAffffff;
     }
 
     private int oilColour(String name){
         if (name.equals("Natural Gas")) {
-            return 0x80daeb;
+            return 0xEE80daeb;
         } else if (name.equals("Light Oil")) {
-            return 0xffdd2b;
+            return 0xEEffdd2b;
         } else if (name.equals("Heavy Oil")) {
-            return 0xc47c0f;
+            return 0xEEc47c0f;
         } else if (name.equals("Raw Oil")) {
-            return 0x773e01;
+            return 0xEE773e01;
         } else if (name.equals("Oil")) {
-            return 0x000000;
+            return 0xEE000000;
         } else {
-            return Integer.decode(String.format("0x%06X", (0xFFFFFF & name.hashCode())));
+            return Integer.decode(String.format("0xEE%06X", (0xFFFFFF & name.hashCode())));
         }
     }
 

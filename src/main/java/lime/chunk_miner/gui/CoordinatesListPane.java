@@ -7,7 +7,6 @@ import gminers.glasspane.component.text.PaneLabel;
 import lime.chunk_miner.ScanDB;
 import net.minecraft.entity.player.EntityPlayer;
 
-import java.util.*;
 
 public class CoordinatesListPane extends GlassPane {
     public CoordinatesListPane(final EntityPlayer p, final String name){

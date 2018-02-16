@@ -31,7 +31,7 @@ public class AreaScanner extends Item {
 
         if (!player.capabilities.isCreativeMode) --itemStack.stackSize;
 
-        w.playSoundAtEntity(player, "IC2:tools.ODScanner", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
+        w.playSoundAtEntity(player, "IC2:Tools.ODScanner", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
 
         return itemStack;
     }

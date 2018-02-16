@@ -5,12 +5,7 @@ import gminers.glasspane.GlassPane;
 import gminers.glasspane.component.PaneScrollPanel;
 import gminers.glasspane.component.button.PaneButton;
 import lime.chunk_miner.ScanDB;
-import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-
-import java.util.Map;
-import java.util.Objects;
 
 
 public class OreListPane extends GlassPane {
@@ -42,7 +37,7 @@ public class OreListPane extends GlassPane {
 
             int i = 0;
             for(final String name : ScanDB.p(p).get_ore_names()){
-                if (name == null || Objects.equals(name, "")) continue;
+                if (name == null || name.equals("")) continue;
                 ClickablePaneLabel btn = GuiHelpers.clickable_label(name, i++, new Runnable() {
                     @Override
                     public void run() {

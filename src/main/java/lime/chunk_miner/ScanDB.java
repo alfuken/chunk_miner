@@ -16,10 +16,12 @@ import java.util.Map;
 public class ScanDB {
     private static ScanDB instance;
     private EntityPlayer player;
+    private String db_file;
 
     public ScanDB(){}
     public ScanDB(EntityPlayer player){
         this.player = player;
+        this.db_file = "jdbc:sqlite:"+playerDataFile().toString();
     }
 
     public static ScanDB p(EntityPlayer p){
@@ -77,11 +79,15 @@ public class ScanDB {
             player.getDisplayName()+".sqlite"
         );
 
-        if (!f.exists()){
-            try {
+        if (!f.exists())
+        {
+            try
+            {
                 f.getParentFile().mkdirs();
                 f.createNewFile();
-            } catch (IOException io){
+            }
+            catch (IOException io)
+            {
                 io.printStackTrace();
             }
         }
@@ -96,25 +102,34 @@ public class ScanDB {
         return get_oil_or_ore_names(1);
     }
 
-    public List<String> get_oil_or_ore_names(int oil){
-        Connection conn = null;
-        String sql = "SELECT DISTINCT name FROM scan_registry WHERE oil = ? ORDER BY name;";
-        List<String> ret = new ArrayList<String>();
-        try {
-            conn = this.connect();
-            PreparedStatement qry = conn.prepareStatement(sql);
+    public List<String> get_oil_or_ore_names(int oil)
+    {
+        Connection         conn = null;
+        PreparedStatement  qry  = null;
+        ResultSet          r    = null;
+        String             sql  = "SELECT DISTINCT name FROM scan_registry WHERE oil = ? ORDER BY name;";
+        List<String>       ret  = new ArrayList<String>();
+        try
+        {
+            conn = DriverManager.getConnection(this.db_file);
+            qry = conn.prepareStatement(sql);
             qry.setInt(1, oil);
-            ResultSet r = qry.executeQuery();
-            while (r.next()) {
+            r = qry.executeQuery();
+
+            while (r.next())
+            {
                 ret.add(r.getString("name"));
             }
-            r.close();
-            qry.close();
-        } catch (SQLException e) {
-//            System.out.println(e.getMessage());
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
-        } finally {
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { System.out.println(e.getMessage()); }}
+        }
+        finally
+        {
+            if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
         }
         return ret;
     }
@@ -136,90 +151,110 @@ public class ScanDB {
     *
     * */
     public Map<Integer, Map<Integer, Integer>> get(String name, int x, int z, int range){
-        Connection conn = null;
-        String sql = "SELECT * FROM scan_registry WHERE name = ? AND x BETWEEN ? AND ? AND z BETWEEN ? and ?;";
+        Connection         conn = null;
+        PreparedStatement  qry  = null;
+        ResultSet          r    = null;
+        String             sql  = "SELECT * FROM scan_registry WHERE name = ? AND x BETWEEN ? AND ? AND z BETWEEN ? and ?;";
         Map<Integer, Map<Integer, Integer>> map = new HashMap<Integer, Map<Integer, Integer>>();
-        try {
-            conn = this.connect();
-            PreparedStatement qry = conn.prepareStatement(sql);
+
+        try
+        {
+            conn = DriverManager.getConnection(this.db_file);
+            qry = conn.prepareStatement(sql);
             qry.setString(1,name);
             qry.setInt(   2,x-range);
             qry.setInt(   3,x+range);
             qry.setInt(   4,z-range);
             qry.setInt(   5,z+range);
-            ResultSet r = qry.executeQuery();
+            r = qry.executeQuery();
 
-            while (r.next()) {
+            while (r.next())
+            {
                 Map<Integer, Integer> map_x = map.get(r.getInt("x"));
-                if (map_x == null) map_x = new HashMap<Integer, Integer>();
+                if (map_x == null)    map_x = new HashMap<Integer, Integer>();
 
-                map_x.put(r.getInt("z"), r.getInt("n"));
+                    map_x.put(r.getInt("z"), r.getInt("n"));
 
                 map.put(r.getInt("x"), map_x);
             }
-
-            r.close();
-            qry.close();
-        } catch (SQLException e) {
-//            System.out.println(e.getMessage());
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
-        } finally {
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { System.out.println(e.getMessage()); }}
+        }
+        finally
+        {
+            if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
         }
 
         return map;
     }
 
     public List<String> get(String name){
-        Connection conn = null;
-        String sql = "SELECT * FROM scan_registry WHERE name = ? ORDER BY n DESC;";
-        List<String> ret = new ArrayList<String>();
-        try {
-            conn = this.connect();
-            PreparedStatement qry = conn.prepareStatement(sql);
-            qry.setString(1,name);
-            ResultSet r = qry.executeQuery();
+        Connection        conn = null;
+        PreparedStatement qry  = null;
+        ResultSet         r    = null;
+        String            sql  = "SELECT * FROM scan_registry WHERE name = ? ORDER BY n DESC;";
+        List<String>      ret  = new ArrayList<String>();
 
-            while (r.next()) {
+        try
+        {
+            conn = DriverManager.getConnection(this.db_file);
+            qry = conn.prepareStatement(sql);
+            qry.setString(1,name);
+            r = qry.executeQuery();
+
+            while (r.next())
+            {
                 ret.add((r.getInt("x")*16+8)+":"+(r.getInt("z")*16+8)+"  |  "+r.getInt("n"));
             }
-
-            r.close();
-            qry.close();
-        } catch (SQLException e) {
-//            System.out.println(e.getMessage());
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
-        } finally {
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { System.out.println(e.getMessage()); }}
+        }
+        finally
+        {
+            if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
         }
         return ret;
     }
 
     public void delete(int x, int z){
-        Connection conn = null;
-        String sql = "DELETE FROM scan_registry WHERE x = ? AND z = ?";
-        try {
-            conn = this.connect();
-            PreparedStatement qry = conn.prepareStatement(sql);
+        Connection        conn = null;
+        PreparedStatement qry  = null;
+        String            sql  = "DELETE FROM scan_registry WHERE x = ? AND z = ?";
+
+        try
+        {
+            conn = DriverManager.getConnection(this.db_file);
+            qry = conn.prepareStatement(sql);
             qry.setInt(1, x);
             qry.setInt(2, z);
-            System.out.println("about to execute delete()");
             qry.executeUpdate();
-            qry.close();
-            System.out.println("executed delete()");
-        } catch (SQLException e) {
-//            System.out.println(e.getMessage());
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
-        } finally {
-            if (conn != null) {try { System.out.println("about to close delete()"); conn.close();System.out.println("Closed delete()"); } catch (SQLException e) { System.out.println(e.getMessage()); }}
+        }
+        finally
+        {
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
         }
     }
 
     public void insert(String item, int x, int z, int n){
-        Connection conn = null;
-        String sql = "INSERT INTO scan_registry(name, item, x, z, n, oil) VALUES(?,?,?,?,?,?);";
-        String name = itemFromString(item).getDisplayName();
-        int oil = 0;
+        Connection        conn = null;
+        PreparedStatement qry  = null;
+        String            sql  = "INSERT INTO scan_registry(name, item, x, z, n, oil) VALUES(?,?,?,?,?,?);";
+        String            name = itemFromString(item).getDisplayName();
+        int               oil  = 0;
+
         if (name.equals("Natural Gas") ||
             name.equals("Light Oil") ||
             name.equals("Heavy Oil") ||
@@ -227,9 +262,10 @@ public class ScanDB {
             name.equals("Oil")
         ) oil = 1;
 
-        try {
-            conn = this.connect();
-            PreparedStatement qry = conn.prepareStatement(sql);
+        try
+        {
+            conn = DriverManager.getConnection(this.db_file);
+            qry = conn.prepareStatement(sql);
             qry.setString(1, name);
             qry.setString(2, item);
             qry.setInt(3, x);
@@ -237,37 +273,50 @@ public class ScanDB {
             qry.setInt(5, n);
             qry.setInt(6, oil);
             qry.executeUpdate();
-            qry.close();
-        } catch (SQLException e) {
-//            System.out.println(e.getMessage());
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
-        } finally {
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { System.out.println(e.getMessage()); }}
+        }
+        finally
+        {
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
         }
     }
 
     private boolean isDBSetUp(){
-        String sql = "SELECT count(*) AS count FROM sqlite_master WHERE type='table' AND name='scan_registry';";
-        Connection conn = null;
-        try {
-            conn = this.connect();
-            Statement qry = this.connect().createStatement();
-            ResultSet r = qry.executeQuery(sql);
-            int cnt = r.getInt("count");
-            r.close();
-            qry.close();
-            return (cnt == 1);
-        } catch (SQLException e) {
-//            System.out.println(e.getMessage());
-            e.printStackTrace();
-        } finally {
-            if (conn != null) {try { conn.close(); System.out.println("Closed isDBSetUp()"); } catch (SQLException e) { System.out.println(e.getMessage()); }}
+        Connection conn   = null;
+        Statement  qry    = null;
+        ResultSet  r      = null;
+        String     sql    = "SELECT count(*) AS count FROM sqlite_master WHERE type='table' AND name='scan_registry';";
+        boolean    set_up = false;
+
+        try
+        {
+            conn = DriverManager.getConnection(this.db_file);
+            qry = conn.createStatement();
+            r = qry.executeQuery(sql);
+            if (r.getInt("count") == 1) set_up = true;
         }
-        return false;
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
+        }
+
+        return set_up;
     }
 
     private void setupPlayerDB() {
-        String sql = "CREATE TABLE IF NOT EXISTS scan_registry (" +
+        Connection conn = null;
+        Statement  qry  = null;
+        String     sql  = "CREATE TABLE IF NOT EXISTS scan_registry (" +
             " id integer PRIMARY KEY AUTOINCREMENT," +
             " name varchar NOT NULL," +
             " item text NOT NULL," +
@@ -286,31 +335,23 @@ public class ScanDB {
         " CREATE INDEX oil_scan_registry_idx"+
         " ON scan_registry (oil, x, z);";
 
-        Connection conn = null;
-        try {
-            conn = this.connect();
-            Statement qry = conn.createStatement();
+        try
+        {
+            conn = DriverManager.getConnection(this.db_file);
+            qry = conn.createStatement();
             System.out.println("about to create the table");
             qry.execute(sql);
-            qry.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (conn != null) {try { conn.close(); System.out.println("Closed setupPlayerDB()"); } catch (SQLException e) { System.out.println(e.getMessage()); }}
         }
-
-    }
-
-    private Connection connect() {
-        String url = "jdbc:sqlite:"+playerDataFile().toString();
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection(url);
-        } catch (SQLException e) {
-//            System.out.println(e.getMessage());
+        catch (SQLException e)
+        {
             e.printStackTrace();
         }
-        return conn;
+        finally
+        {
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
+        }
+
     }
 
 }
