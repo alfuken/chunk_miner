@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -25,9 +26,17 @@ public class AreaScanner extends Item {
         if (w.isRemote) return itemStack;
 
         List<NBTTagCompound> data = ChunkMinerHelpers.areaScanResultsAsNBTList(w, (int)player.posX, (int)player.posZ, Config.area_scan_radius);
+
+        NBTTagCompound all_data = new NBTTagCompound();
+        all_data.setBoolean("big_batch", true);
+        NBTTagList tag_list = new NBTTagList();
         for(NBTTagCompound entry : data){
-            ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(entry), (EntityPlayerMP) player);
+            tag_list.appendTag(entry);
+//            ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(entry), (EntityPlayerMP) player);
         }
+        all_data.setTag("tag_list", tag_list);
+
+        ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(all_data), (EntityPlayerMP) player);
 
         if (!player.capabilities.isCreativeMode) --itemStack.stackSize;
 

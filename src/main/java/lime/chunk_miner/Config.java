@@ -6,18 +6,15 @@ import org.apache.logging.log4j.Level;
 public class Config {
     private static final String CS = "Scanner";
 
-    public static String[] ignored_materials = {" Dust", "Chipped ", "Flawed ", "Crushed "};
-    public static boolean skip_poor_ores     = true;
-    public static boolean inform_gt_chunks   = true;
+    public static String[] ignored_materials = {" Dust", "Chipped ", "Flawed ", "Crushed ", "Impure Pile of "};
     public static String  scan_mode          = "optimistic";
-    public static int area_scan_radius       = 5;
-
+    public static int area_scan_radius       = 7;
 
     private static final String CM = "Miner";
 
-    public static int work_to_mine           = 3;
+    public static int work_to_mine           = 5;
     public static int seconds_to_mine        = 10;
-    public static boolean load_chunks        = false;
+    public static boolean load_chunks        = true;
     public static boolean selfdestruct       = true;
     public static boolean require_redstone   = true;
 
@@ -26,9 +23,7 @@ public class Config {
         try {
             cfg.load();
 
-            ignored_materials = cfg.getStringList("Don't show these materials in scan report", CS, ignored_materials, "List of substrings to ignore when 'Don't show poor ores' is set to 'true'. By default it ignores poor ores and cheap gems. Quarry still mines them though!");
-            skip_poor_ores    = cfg.getBoolean("Don't show poor ores in scan report",          CS, skip_poor_ores,    "Don't show poor ores and cheap gems in scan report.");
-            inform_gt_chunks  = cfg.getBoolean("Inform about GT Vein chunk",                   CS, inform_gt_chunks,  "If enabled, chunk_scanner will notify player if he is in the chunk where GT Vein core is generated (works only if Gregtech is installed).");
+            ignored_materials = cfg.getStringList("Ignore these materials in scan report",     CS, ignored_materials, "List of substrings to ignore when 'Don't show poor ores' is set to 'true'. By default it ignores poor ores and cheap gems. Quarry still mines them though!");
             scan_mode         = cfg.getString("Scan mode",                                     CS, scan_mode,         "Ore scanning mode. Optimistic is fastest: considers valuable all blocks who's internal (unlocalized) name contains substring 'ore'. Classic is slower: uses the same mechanics as IC2 Ore Scanner.", new String[]{"optimistic", "classic"});
             area_scan_radius  = cfg.getInt("Area scan radius in chunks",                       CS, area_scan_radius, 1, 32, "Area scan radius in chunks. Value of 1 scans area 3x3 chunks. Value of 3 scans 7x7 (49) chunks. Higher the number, higher the load on CPU.");
 

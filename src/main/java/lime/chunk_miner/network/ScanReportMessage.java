@@ -39,7 +39,7 @@ public class ScanReportMessage implements IMessage {
                 NBTTagList list = message.payload.getTagList("list", message.payload.getId());
                 for (int i = 0; i < list.tagCount(); i++) {
                     NBTTagCompound nbt = list.getCompoundTagAt(i);
-                    String row = " " + nbt.getInteger("n") + " x " + ScanDB.itemFromString(nbt.getString("item")).getDisplayName();
+                    String row = " " + nbt.getInteger("n") + " x " + ScanDB.nameFromString(nbt.getString("item"));
                     p.addChatMessage(new ChatComponentText(row));
                 }
             }

@@ -103,10 +103,8 @@ public class ChunkMinerHelpers {
     }
 
     private static boolean shouldBeSkipped(String name){
-        if (Config.skip_poor_ores) {
-            for(String m : Config.ignored_materials){
-                if (name.contains(m)) return true;
-            }
+        for(String m : Config.ignored_materials){
+            if (name.contains(m)) return true;
         }
         return false;
     }

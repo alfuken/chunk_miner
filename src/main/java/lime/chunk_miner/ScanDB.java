@@ -5,7 +5,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.fluids.FluidStack;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
@@ -21,6 +24,7 @@ public class ScanDB {
     public ScanDB(){}
     public ScanDB(EntityPlayer player){
         this.player = player;
+        // or just Minecraft.getMinecraft().thePlayer
         this.db_file = "jdbc:sqlite:"+playerDataFile().toString();
     }
 
@@ -36,8 +40,21 @@ public class ScanDB {
         return ScanDB.instance;
     }
 
+    /*
+
+    =============================== STATICS ===============================
+
+     */
+    public static boolean isFluidTag(NBTTagCompound tag){
+        return tag.hasKey("FluidName");
+    }
+
     public static String itemToString(ItemStack item){
         return tagToString(item.writeToNBT(new NBTTagCompound()));
+    }
+
+    public static String fluidToString(FluidStack fluid){
+        return tagToString(fluid.writeToNBT(new NBTTagCompound()));
     }
 
     public static String tagToString(NBTTagCompound tag){
@@ -46,32 +63,52 @@ public class ScanDB {
         try {
             CompressedStreamTools.write(tag, os);
             os.close();
+            baos.close();
         } catch (IOException io){
-            io.printStackTrace();
+            io.printStackTrace(System.out);
         }
 
-        return baos.toString();
+        return DatatypeConverter.printBase64Binary(baos.toByteArray());
     }
 
     public static ItemStack itemFromString(String s){
         return ItemStack.loadItemStackFromNBT(tagFromString(s));
     }
 
+    public static FluidStack fluidFromString(String s){
+        return FluidStack.loadFluidStackFromNBT(tagFromString(s));
+    }
+
     public static NBTTagCompound tagFromString(String s){
         NBTTagCompound tag = new NBTTagCompound();
 
-        ByteArrayInputStream bais = new ByteArrayInputStream(s.getBytes());
+        ByteArrayInputStream bais = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(s));
         DataInputStream is = new DataInputStream(bais);
         try {
             tag = CompressedStreamTools.read(is);
             is.close();
+            bais.close();
         } catch (IOException io){
-            io.printStackTrace();
+            io.printStackTrace(System.out);
         }
 
         return tag;
     }
 
+    public static String nameFromString(String str){
+        NBTTagCompound tag = tagFromString(str);
+        if (isFluidTag(tag)){
+            return FluidStack.loadFluidStackFromNBT(tag).getLocalizedName();
+        } else {
+            return ItemStack.loadItemStackFromNBT(tag).getDisplayName();
+        }
+    }
+
+    /*
+    *
+    * =============================== Instance methods ===============================
+    *
+    * */
     private File playerDataFile(){
         File f = new File(
             "./" + ChunkMiner.MODID + File.separator +
@@ -88,7 +125,7 @@ public class ScanDB {
             }
             catch (IOException io)
             {
-                io.printStackTrace();
+                io.printStackTrace(System.out);
             }
         }
         return f;
@@ -123,13 +160,13 @@ public class ScanDB {
         }
         catch (SQLException e)
         {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
         }
         finally
         {
-            if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(); }}
-            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
         return ret;
     }
@@ -180,13 +217,13 @@ public class ScanDB {
         }
         catch (SQLException e)
         {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
         }
         finally
         {
-            if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(); }}
-            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
 
         return map;
@@ -208,18 +245,18 @@ public class ScanDB {
 
             while (r.next())
             {
-                ret.add((r.getInt("x")*16+8)+":"+(r.getInt("z")*16+8)+"  |  "+r.getInt("n"));
+                ret.add((r.getInt("x")*16+8)+":"+(r.getInt("z")*16+8)+" x "+r.getInt("n"));
             }
         }
         catch (SQLException e)
         {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
         }
         finally
         {
-            if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(); }}
-            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
         return ret;
     }
@@ -239,12 +276,12 @@ public class ScanDB {
         }
         catch (SQLException e)
         {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
         }
         finally
         {
-            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
     }
 
@@ -252,7 +289,7 @@ public class ScanDB {
         Connection        conn = null;
         PreparedStatement qry  = null;
         String            sql  = "INSERT INTO scan_registry(name, item, x, z, n, oil) VALUES(?,?,?,?,?,?);";
-        String            name = itemFromString(item).getDisplayName();
+        String            name = nameFromString(item);
         int               oil  = 0;
 
         if (name.equals("Natural Gas") ||
@@ -276,12 +313,12 @@ public class ScanDB {
         }
         catch (SQLException e)
         {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
         }
         finally
         {
-            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
     }
 
@@ -301,13 +338,13 @@ public class ScanDB {
         }
         catch (SQLException e)
         {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
         }
         finally
         {
-            if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(); }}
-            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
 
         return set_up;
@@ -315,8 +352,8 @@ public class ScanDB {
 
     private void setupPlayerDB() {
         Connection conn = null;
-        Statement  qry  = null;
-        String     sql  = "CREATE TABLE IF NOT EXISTS scan_registry (" +
+        Statement qry = null;
+        String     sql = "CREATE TABLE IF NOT EXISTS scan_registry (" +
             " id integer PRIMARY KEY AUTOINCREMENT," +
             " name varchar NOT NULL," +
             " item text NOT NULL," +
@@ -335,21 +372,15 @@ public class ScanDB {
         " CREATE INDEX oil_scan_registry_idx"+
         " ON scan_registry (oil, x, z);";
 
-        try
-        {
+        try {
             conn = DriverManager.getConnection(this.db_file);
             qry = conn.createStatement();
-            System.out.println("about to create the table");
             qry.execute(sql);
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(); }}
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }}
+        } catch (SQLException e) {
+            e.printStackTrace(System.out);
+        } finally {
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
 
     }
