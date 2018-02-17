@@ -5,11 +5,13 @@ import gminers.glasspane.component.PaneScrollPanel;
 import gminers.glasspane.component.button.PaneButton;
 import gminers.glasspane.component.text.PaneLabel;
 import lime.chunk_miner.ScanDB;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 
 
 public class CoordinatesListPane extends GlassPane {
-    public CoordinatesListPane(final EntityPlayer p, final String name){
+    public CoordinatesListPane(final String name){
+        final EntityPlayer p = Minecraft.getMinecraft().thePlayer;
         setRevertAllowed(true);
         setName("CoordinatesListPane");
         setShadowbox(null);
@@ -20,7 +22,7 @@ public class CoordinatesListPane extends GlassPane {
         PaneScrollPanel scroll_panel = GuiHelpers.scroll_panel(name+" Coordinates");
 
             int i = 0;
-            for(String e : ScanDB.p(p).get(name)){
+            for(String e : ScanDB.get(name)){
                 PaneLabel label = GuiHelpers.label(e, ++i);
                 scroll_panel.add(label);
             }
@@ -37,7 +39,7 @@ public class CoordinatesListPane extends GlassPane {
         map.registerActivationListener(new Runnable() {
             @Override
             public void run() {
-                new MapPane(p, name).show();
+                new MapPane(name).show();
             }
         });
         add(map);

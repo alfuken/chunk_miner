@@ -27,26 +27,7 @@ public class ClearScanDataMessage implements IMessage {
             if (ctx.side.isClient()){
                 EntityPlayer player = ChunkMiner.proxy.getPlayer(ctx);
                 for(String m : Config.ignored_materials){
-                    Connection conn = null;
-                    PreparedStatement qry  = null;
-                    String            sql  = "DELETE FROM scan_registry WHERE name like ?";
-
-                    try
-                    {
-                        conn = DriverManager.getConnection(ScanDB.p(player).db_file);
-                        qry = conn.prepareStatement(sql);
-                        qry.setString(1, "%"+m+"%");
-                        qry.executeUpdate();
-                    }
-                    catch (SQLException e)
-                    {
-                        e.printStackTrace(System.out);
-                    }
-                    finally
-                    {
-                        if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
-                        if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
-                    }
+                    ScanDB.deleteBadScanResults(m);
                 }
                 player.addChatMessage(new ChatComponentText("Scan data was cleared."));
             }

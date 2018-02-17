@@ -10,7 +10,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
+
+import java.util.HashMap;
 
 
 public class ChunkScanner extends Item {
@@ -23,9 +24,11 @@ public class ChunkScanner extends Item {
     public ItemStack onItemRightClick(ItemStack itemStack, World w, EntityPlayer p) {
         if (w.isRemote) return itemStack;
 
-        Chunk c = w.getChunkFromBlockCoords((int)p.posX, (int)p.posZ);
-        NBTTagCompound data = Utils.chunkScanResultsAsTag(c);
-        ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(data), (EntityPlayerMP) p);
+        HashMap scan_result = Utils.scan(w, (int)p.posX, (int)p.posZ);
+        String data = Utils.mapToString(scan_result);
+        NBTTagCompound payload = new NBTTagCompound();
+        payload.setString("payload", data);
+        ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(payload), (EntityPlayerMP) p);
         ChunkMiner.network.sendTo(new ScanReportMessage(data), (EntityPlayerMP) p);
 
 

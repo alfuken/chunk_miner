@@ -10,7 +10,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fluids.FluidStack;
@@ -112,50 +111,39 @@ public class Utils {
         return false;
     }
 
-    public static List<NBTTagCompound> areaScanResultsAsNBTList(World w, int wx, int wz, int radius) {
-        List<NBTTagCompound> ret = new ArrayList<NBTTagCompound>();
-        Chunk c = w.getChunkFromBlockCoords(wx, wz);
+    public static HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> scan(World w, int player_x, int player_z)
+    {
+        return scan(w, player_x, player_z, 0);
+    }
+
+    public static HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> scan(World w, int player_x, int player_z, int radius)
+    {
+        //      X                Z                Item    Count                           X                Z                Item    Count
+        HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> theMap = new HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>>();
+        Chunk c = w.getChunkFromBlockCoords(player_x, player_z);
 
         for (int x = c.xPosition-radius; x <= c.xPosition+radius; x++) {
             for (int z = c.zPosition-radius; z <= c.zPosition+radius; z++) {
-                try {
-                    Chunk chunk = w.getChunkFromChunkCoords(x, z);
-                    ret.add(chunkScanResultsAsTag(chunk));
-                } catch (NoSuchElementException e){}
+                try
+                {
+                    HashMap<Integer, HashMap<String, Integer>> x_value = theMap.get(x);
+
+                    if (x_value == null) x_value = new HashMap<Integer, HashMap<String, Integer>>();
+
+                    x_value.put(z, scanChunk(w.getChunkFromChunkCoords(x, z)));
+
+                    theMap.put(x, x_value);
+                }
+                catch (NoSuchElementException e){e.printStackTrace(System.out);}
             }
         }
 
-        return ret;
+        return theMap;
     }
 
-    public static NBTTagCompound chunkScanResultsAsTag(Chunk c){
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setInteger("x", c.xPosition);
-        tag.setInteger("z", c.zPosition);
-        NBTTagList list = new NBTTagList();
-        for(NBTTagCompound entry : chunkScanResultsAsNBTList(c)){
-            list.appendTag(entry);
-        }
-        tag.setTag("list", list);
-        return tag;
-    }
-
-    public static List<NBTTagCompound> chunkScanResultsAsNBTList(Chunk c){
-        List<NBTTagCompound> ret = new ArrayList<NBTTagCompound>();
-        NBTTagCompound tag;
-
-        for(Map.Entry<String, Integer> entry : chunkScanResultsAsMap(c).entrySet()){
-            tag = new NBTTagCompound();
-            tag.setString("item", entry.getKey());
-            tag.setInteger("n", entry.getValue());
-            ret.add(tag);
-        }
-
-        return ret;
-    }
-
-    public static Map<String, Integer> chunkScanResultsAsMap(Chunk c) {
-        Map<String, Integer> ret = new HashMap<String, Integer>();
+    public static HashMap<String, Integer> scanChunk(Chunk c)
+    {
+        HashMap<String, Integer> ret = new HashMap<String, Integer>();
         int meta;
         Block block;
         World w = c.worldObj;
@@ -189,8 +177,8 @@ public class Utils {
 
     }
 
-    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
-        List<Map.Entry<K, V>> list = new LinkedList<Map.Entry<K, V>>( map.entrySet() );
+    public static <K, V extends Comparable<? super V>> HashMap<K, V> sortByValue(HashMap<K, V> map) {
+        List<HashMap.Entry<K, V>> list = new LinkedList<Map.Entry<K, V>>( map.entrySet() );
         Collections.sort( list, new Comparator<Map.Entry<K, V>>() {
             public int compare( Map.Entry<K, V> o1, Map.Entry<K, V> o2 )
             {
@@ -198,8 +186,8 @@ public class Utils {
             }
         });
 
-        Map<K, V> result = new LinkedHashMap<K, V>();
-        for (Map.Entry<K, V> entry : list)
+        HashMap<K, V> result = new LinkedHashMap<K, V>();
+        for (HashMap.Entry<K, V> entry : list)
         {
             result.put( entry.getKey(), entry.getValue() );
         }
@@ -264,4 +252,53 @@ public class Utils {
             return ItemStack.loadItemStackFromNBT(tag).getDisplayName();
         }
     }
+
+    public static String mapToString(HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> map){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try
+        {
+            ObjectOutputStream os = new ObjectOutputStream(baos);
+            os.writeObject(map);
+            os.close();
+        }
+        catch (IOException io)
+        {
+            io.printStackTrace(System.out);
+        }
+        finally
+        {
+            try{baos.close();}catch(IOException io){io.printStackTrace(System.out);}
+        }
+
+        return DatatypeConverter.printBase64Binary(baos.toByteArray());
+    }
+
+    public static HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> mapFromString(String s){
+        HashMap map = new HashMap();
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(s));
+        try {
+            ObjectInputStream is = new ObjectInputStream(bais);
+            map = (HashMap) is.readObject();
+            is.close();
+            bais.close();
+        }
+        catch (IOException io)
+        {
+            io.printStackTrace(System.out);
+        }
+        catch(ClassNotFoundException c)
+        {
+            System.out.println("Class not found!");
+            c.printStackTrace(System.out);
+        }
+        finally
+        {
+            try{bais.close();}catch(IOException io){io.printStackTrace(System.out);}
+        }
+
+        return map;
+    }
+
+
 }

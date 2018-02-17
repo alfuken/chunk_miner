@@ -11,28 +11,26 @@ import java.util.List;
 import java.util.Map;
 
 public class ScanDB {
-    private static ScanDB instance;
-    private EntityPlayer player;
-    public String db_file;
-    public long locked_at;
+    private static long locked_at = 0;
+    private static boolean dbSetUp = false;
 
     public ScanDB(){}
-    public ScanDB(EntityPlayer player){
-        this.player = player;
-        // or just Minecraft.getMinecraft().thePlayer
-        this.db_file = "jdbc:sqlite:"+playerDataFile().toString();
+
+    public static void initDB(){
+        if (!dbSetUp){
+            if (!ScanDB.isDBSetUp()) {
+                ScanDB.setupPlayerDB();
+                dbSetUp = true;
+            }
+        }
     }
 
-    public static ScanDB p(EntityPlayer p){
-        if (!p.getEntityWorld().isRemote) return new ScanDB();
+    public static EntityPlayer player(){
+        return Minecraft.getMinecraft().thePlayer;
+    }
 
-        if (ScanDB.instance == null || (!p.getDisplayName().equals(ScanDB.instance.player.getDisplayName()))) {
-            ScanDB.instance = new ScanDB(p);
-            boolean set_up = ScanDB.instance.isDBSetUp();
-            if (!set_up) ScanDB.instance.setupPlayerDB();
-        }
-
-        return ScanDB.instance;
+    public static String dbFile(){
+        return "jdbc:sqlite:"+playerDataFile().toString();
     }
 
     /*
@@ -41,14 +39,15 @@ public class ScanDB {
     *
     * */
 
-    public void lock(){this.locked_at = System.currentTimeMillis();}
-    public void unlock(){this.locked_at = 0;}
+    public static void lock(){locked_at = System.currentTimeMillis();}
+    public static void unlock(){locked_at = 0;}
+    public static long getLock(){return locked_at;}
 
-    private File playerDataFile(){
+    private static File playerDataFile(){
         File f = new File(
             "./" + ChunkMiner.MODID + File.separator +
             Minecraft.getMinecraft().func_147104_D().serverName + File.separator +
-            player.getDisplayName()+".sqlite"
+            player().getDisplayName()+".sqlite"
         );
 
         if (!f.exists())
@@ -66,16 +65,17 @@ public class ScanDB {
         return f;
     }
 
-    public List<String> get_ore_names(){
+    public static List<String> get_ore_names(){
         return get_oil_or_ore_names(0);
     }
 
-    public List<String> get_oil_names(){
+    public static List<String> get_oil_names(){
         return get_oil_or_ore_names(1);
     }
 
-    public List<String> get_oil_or_ore_names(int oil)
+    private static List<String> get_oil_or_ore_names(int oil)
     {
+        initDB();
         Connection         conn = null;
         PreparedStatement  qry  = null;
         ResultSet          r    = null;
@@ -83,7 +83,7 @@ public class ScanDB {
         List<String>       ret  = new ArrayList<String>();
         try
         {
-            conn = DriverManager.getConnection(this.db_file);
+            conn = DriverManager.getConnection(dbFile());
             qry = conn.prepareStatement(sql);
             qry.setInt(1, oil);
             r = qry.executeQuery();
@@ -99,9 +99,9 @@ public class ScanDB {
         }
         finally
         {
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
-            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
             if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
         return ret;
     }
@@ -122,7 +122,9 @@ public class ScanDB {
     * }
     *
     * */
-    public Map<Integer, Map<Integer, Integer>> get(String name, int x, int z, int range){
+    public static Map<Integer, Map<Integer, Integer>> get(String name, int x, int z, int range)
+    {
+        initDB();
         Connection         conn = null;
         PreparedStatement  qry  = null;
         ResultSet          r    = null;
@@ -131,13 +133,13 @@ public class ScanDB {
 
         try
         {
-            conn = DriverManager.getConnection(this.db_file);
+            conn = DriverManager.getConnection(dbFile());
             qry = conn.prepareStatement(sql);
             qry.setString(1,name);
-            qry.setInt(   2,x-range);
-            qry.setInt(   3,x+range);
-            qry.setInt(   4,z-range);
-            qry.setInt(   5,z+range);
+            qry.setInt(2,x-range);
+            qry.setInt(3,x+range);
+            qry.setInt(4,z-range);
+            qry.setInt(5,z+range);
             r = qry.executeQuery();
 
             while (r.next())
@@ -156,15 +158,17 @@ public class ScanDB {
         }
         finally
         {
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
-            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
             if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
 
         return map;
     }
 
-    public List<String> get(String name){
+    public static List<String> get(String name)
+    {
+        initDB();
         Connection        conn = null;
         PreparedStatement qry  = null;
         ResultSet         r    = null;
@@ -173,7 +177,7 @@ public class ScanDB {
 
         try
         {
-            conn = DriverManager.getConnection(this.db_file);
+            conn = DriverManager.getConnection(dbFile());
             qry = conn.prepareStatement(sql);
             qry.setString(1,name);
             r = qry.executeQuery();
@@ -189,21 +193,23 @@ public class ScanDB {
         }
         finally
         {
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
-            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
             if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
         return ret;
     }
 
-    public void delete(int x, int z){
-        Connection        conn = null;
-        PreparedStatement qry  = null;
-        String            sql  = "DELETE FROM scan_registry WHERE x = ? AND z = ?";
+    public static void delete(int x, int z)
+    {
+        initDB();
+        Connection conn = null;
+        PreparedStatement qry = null;
+        String sql = "DELETE FROM scan_registry WHERE x = ? AND z = ?";
 
         try
         {
-            conn = DriverManager.getConnection(this.db_file);
+            conn = DriverManager.getConnection(dbFile());
             qry = conn.prepareStatement(sql);
             qry.setInt(1, x);
             qry.setInt(2, z);
@@ -215,12 +221,39 @@ public class ScanDB {
         }
         finally
         {
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
             if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
     }
 
-    public void insert(String item, int x, int z, int n){
+    public static void deleteBadScanResults(String string)
+    {
+        initDB();
+        Connection conn = null;
+        PreparedStatement qry = null;
+        String sql = "DELETE FROM scan_registry WHERE name like ?";
+
+        try
+        {
+            conn = DriverManager.getConnection(dbFile());
+            qry = conn.prepareStatement(sql);
+            qry.setString(1, "%"+string+"%");
+            qry.executeUpdate();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace(System.out);
+        }
+        finally
+        {
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
+        }
+    }
+
+    public static void insert(String item, int x, int z, int n)
+    {
+        initDB();
         Connection        conn = null;
         PreparedStatement qry  = null;
         String            sql  = "INSERT INTO scan_registry(name, item, x, z, n, oil) VALUES(?,?,?,?,?,?);";
@@ -238,7 +271,7 @@ public class ScanDB {
 
         try
         {
-            conn = DriverManager.getConnection(this.db_file);
+            conn = DriverManager.getConnection(dbFile());
             qry = conn.prepareStatement(sql);
             qry.setString(1, name);
             qry.setString(2, item);
@@ -254,12 +287,13 @@ public class ScanDB {
         }
         finally
         {
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
             if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
     }
 
-    private boolean isDBSetUp(){
+    private static boolean isDBSetUp()
+    {
         Connection conn   = null;
         Statement  qry    = null;
         ResultSet  r      = null;
@@ -268,7 +302,7 @@ public class ScanDB {
 
         try
         {
-            conn = DriverManager.getConnection(this.db_file);
+            conn = DriverManager.getConnection(dbFile());
             qry = conn.createStatement();
             r = qry.executeQuery(sql);
             if (r.getInt("count") == 1) set_up = true;
@@ -279,18 +313,19 @@ public class ScanDB {
         }
         finally
         {
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
-            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
             if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
 
         return set_up;
     }
 
-    private void setupPlayerDB() {
+    private static void setupPlayerDB()
+    {
         Connection conn = null;
         Statement qry = null;
-        String     sql = "CREATE TABLE IF NOT EXISTS scan_registry (" +
+        String sql = "CREATE TABLE IF NOT EXISTS scan_registry (" +
             " id integer PRIMARY KEY AUTOINCREMENT," +
             " name varchar NOT NULL," +
             " item text NOT NULL," +
@@ -310,14 +345,14 @@ public class ScanDB {
         " ON scan_registry (oil, x, z);";
 
         try {
-            conn = DriverManager.getConnection(this.db_file);
+            conn = DriverManager.getConnection(dbFile());
             qry = conn.createStatement();
             qry.execute(sql);
         } catch (SQLException e) {
             e.printStackTrace(System.out);
         } finally {
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
             if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
 
     }

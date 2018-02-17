@@ -5,11 +5,9 @@ import gminers.glasspane.GlassPane;
 import gminers.glasspane.component.PaneScrollPanel;
 import gminers.glasspane.component.button.PaneButton;
 import lime.chunk_miner.ScanDB;
-import net.minecraft.entity.player.EntityPlayer;
-
 
 public class OreListPane extends GlassPane {
-    public OreListPane(final EntityPlayer p){
+    public OreListPane(){
         setName("OreListPane");
         setShadowbox(null);
 
@@ -27,7 +25,7 @@ public class OreListPane extends GlassPane {
             oil.registerActivationListener(new Runnable() {
                 @Override
                 public void run() {
-                    new OilListPane(p).show();
+                    new OilListPane().show();
                 }
             });
             add(oil);
@@ -36,12 +34,12 @@ public class OreListPane extends GlassPane {
         PaneScrollPanel scroll_panel = GuiHelpers.scroll_panel("Scan registry");
 
             int i = 0;
-            for(final String name : ScanDB.p(p).get_ore_names()){
+            for(final String name : ScanDB.get_ore_names()){
                 if (name == null || name.equals("")) continue;
                 ClickablePaneLabel btn = GuiHelpers.clickable_label(name, i++, new Runnable() {
                     @Override
                     public void run() {
-                        new MapPane(p, name).show();
+                        new MapPane(name).show();
                     }
                 });
                 scroll_panel.add(btn);

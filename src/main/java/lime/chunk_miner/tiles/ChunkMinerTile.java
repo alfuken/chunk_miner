@@ -19,6 +19,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fluids.IFluidBlock;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -109,7 +110,13 @@ public class ChunkMinerTile extends TileEntity {
     }
 
     public void statusReport(EntityPlayer player){
-        player.addChatMessage(new ChatComponentText("Miner currently checking block at "+currX+":"+currY+":"+currZ+", redstone: "+redstone+", mines down from "+mineFromY()+". Cooldown: "+ cooldown +" ("+ seconds_to_mine +")"));
+        String rs_status = "";
+        if (Config.require_redstone) {
+            rs_status += "[Redstone ";
+            rs_status += redstone ? "ON" : "OFF";
+            rs_status += "] ";
+        }
+        player.addChatMessage(new ChatComponentText(rs_status+"Mining block at "+currX+":"+currY+":"+currZ+", from "+mineFromY()+" to bedrock. Cooldown: "+ cooldown +"s of "+ seconds_to_mine +""));
     }
 
     public void report(String text) {
@@ -174,11 +181,11 @@ public class ChunkMinerTile extends TileEntity {
     private void finish(){
         if (getOwner() != null) {
             getOwner().addChatMessage(new ChatComponentText("> Miner at " + this.xCoord + ":" + this.zCoord + " have finished mining."));
-
-            Chunk c = this.worldObj.getChunkFromBlockCoords(this.xCoord, this.zCoord);
-            NBTTagCompound data = Utils.chunkScanResultsAsTag(c);
-            ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(data), (EntityPlayerMP) getOwner());
-
+            HashMap scan_result = Utils.scan(this.getWorldObj(), this.xCoord, this.zCoord);
+            String data = Utils.mapToString(scan_result);
+            NBTTagCompound payload = new NBTTagCompound();
+            payload.setString("payload", data);
+            ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(payload), (EntityPlayerMP) getOwner());
         }
         if (Config.selfdestruct) {
             getWorldObj().setBlockToAir(this.xCoord, this.yCoord, this.zCoord);

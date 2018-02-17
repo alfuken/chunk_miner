@@ -6,9 +6,9 @@ import org.apache.logging.log4j.Level;
 public class Config {
     private static final String CS = "Scanner";
 
-    public static String[] ignored_materials = {" Dust", "Chipped ", "Flawed ", "Crushed ", "Impure Pile of "};
+    public static String[] ignored_materials = {"Chipped ", "Flawed ", "Crushed ", "Impure Pile of ", " Dust"};
     public static String  scan_mode          = "optimistic";
-    public static int area_scan_radius       = 7;
+    public static int area_scan_radius       = 3;
 
     private static final String CM = "Miner";
 

@@ -3,10 +3,9 @@ package lime.chunk_miner.gui;
 import gminers.glasspane.GlassPane;
 import gminers.glasspane.component.PaneScrollPanel;
 import lime.chunk_miner.ScanDB;
-import net.minecraft.entity.player.EntityPlayer;
 
 public class OilListPane extends GlassPane {
-    public OilListPane(final EntityPlayer p) {
+    public OilListPane() {
         setRevertAllowed(true);
         setName("OilListPane");
         setShadowbox(null);
@@ -17,17 +16,18 @@ public class OilListPane extends GlassPane {
         PaneScrollPanel scroll_panel = GuiHelpers.scroll_panel("Scan registry");
 
         int i = 0;
-        for(final String name : ScanDB.p(p).get_oil_names()){
+        for(final String name : ScanDB.get_oil_names()){
             if (name == null || name.equals("")) continue;
             ClickablePaneLabel btn = GuiHelpers.clickable_label(name, i++, new Runnable() {
                 @Override
                 public void run() {
-                    new MapPane(p, name).show();
+                    new MapPane(name).show();
                 }
             });
             scroll_panel.add(btn);
         }
 
+        add(scroll_panel);
 
     }
 }
