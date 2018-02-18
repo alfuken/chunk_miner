@@ -184,7 +184,8 @@ public class ScanDB {
 
             while (r.next())
             {
-                ret.add((r.getInt("x")*16+8)+":"+(r.getInt("z")*16+8)+" x "+r.getInt("n"));
+                String row = (r.getInt("x")*16+8)+":"+(r.getInt("z")*16+8)+" x "+r.getInt("n");
+                if (!ret.contains(row)) ret.add(row);
             }
         }
         catch (SQLException e)

@@ -8,50 +8,57 @@ import io.netty.buffer.ByteBuf;
 import lime.chunk_miner.ScanDB;
 import lime.chunk_miner.Utils;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ChatComponentText;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
 
-public class SaveChunkScanReportMessage implements IMessage {
-    public SaveChunkScanReportMessage(){}
-    private NBTTagCompound payload;
-    public SaveChunkScanReportMessage(NBTTagCompound payload){
+public class SaveScanReportMessage implements IMessage {
+    public SaveScanReportMessage(){}
+    private NBTTagList payload;
+    public SaveScanReportMessage(NBTTagList payload)
+    {
         this.payload = payload;
     }
 
-    @Override public void toBytes(ByteBuf buf) {
-        ByteBufUtils.writeTag(this.payload);
-    }
-    @Override public void fromBytes(ByteBuf buf) {
-//        this.payload = new byte[buf.readableBytes()];
-        buf.readBytes(this.payload);
+    @Override public void toBytes(ByteBuf buf)
+    {
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setTag("list", this.payload);
+        ByteBufUtils.writeTag(buf, tag);
+
     }
 
-    public static class Handler implements IMessageHandler<SaveChunkScanReportMessage, IMessage> {
+    @Override public void fromBytes(ByteBuf buf)
+    {
+        this.payload = ByteBufUtils.readTag(buf).getTagList("list", (new NBTTagCompound()).getId());
+    }
 
-        class SaveChunkScanReportThread extends Thread {
-            private NBTTagCompound tag;
-            public SaveChunkScanReportThread(NBTTagCompound tag) {
+    public static class Handler implements IMessageHandler<SaveScanReportMessage, IMessage>
+    {
+
+        class SaveChunkScanReportThread extends Thread
+        {
+            private NBTTagList payload;
+            public SaveChunkScanReportThread(NBTTagList payload)
+            {
                 super();
-                this.tag = tag;
+                this.payload = payload;
             }
 
-            public void run() {
+            public void run()
+            {
                 ScanDB.lock();
                 ScanDB.initDB();
-
-                HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> map = Utils.mapFromNBT(tag);
 
                 Connection conn = null;
                 PreparedStatement qry = null;
                 String sql = "INSERT INTO scan_registry(name, item, x, z, n, oil) VALUES(?,?,?,?,?,?);";
                 int count = 0;
                 final int batchSize = 1000;
-                int xses = 0;
 
                 try
                 {
@@ -59,30 +66,30 @@ public class SaveChunkScanReportMessage implements IMessage {
                     qry = conn.prepareStatement(sql);
                     qry.setQueryTimeout(10);
 
-                    for(HashMap.Entry<Integer, HashMap<Integer, HashMap<String, Integer>>> x_entry : map.entrySet())
-                    {
-                        int x = x_entry.getKey();
-                        xses++;
+                    for (int i = 0; i < payload.tagCount(); i++) {
 
-                        for(HashMap.Entry<Integer, HashMap<String, Integer>> z_entry : x_entry.getValue().entrySet())
+                        NBTTagCompound tag = payload.getCompoundTagAt(i);
+                        int x = tag.getInteger("x");
+                        int z = tag.getInteger("z");
+
+                        for (Object _item : tag.func_150296_c())
                         {
-                            int z = z_entry.getKey();
+                            String item = (String)_item;
 
-                            for (HashMap.Entry<String, Integer> item_entry : z_entry.getValue().entrySet())
+                            if (!item.equals("x") && !item.equals("z"))
                             {
-                                String item = item_entry.getKey();
-                                int n = item_entry.getValue();
                                 String name = Utils.nameFromString(item);
 
                                 if (!Utils.shouldBeSkipped(name))
                                 {
-                                    int oil  = 0;
-                                    if (name.equals("Natural Gas")
+                                    int n = tag.getInteger(item);
+                                    int oil = (
+                                           name.equals("Natural Gas")
                                         || name.equals("Light Oil")
                                         || name.equals("Heavy Oil")
                                         || name.equals("Raw Oil")
                                         || name.equals("Oil")
-                                    ) oil = 1;
+                                    ) ? 1 : 0;
 
                                     qry.setString(1, name);
                                     qry.setString(2, item);
@@ -95,10 +102,12 @@ public class SaveChunkScanReportMessage implements IMessage {
                                     if(++count % batchSize == 0) {
                                         qry.executeBatch();
                                     }
+
                                 }
                             }
                         }
                     }
+
                     qry.executeBatch();
 
                 }
@@ -115,23 +124,23 @@ public class SaveChunkScanReportMessage implements IMessage {
                 double time_taken = (System.currentTimeMillis() - ScanDB.getLock())/1000.0;
                 ScanDB.unlock();
 
-                if (xses > 1){
+                if (payload.tagCount() > 1){
                     ScanDB.player().addChatMessage(new ChatComponentText(String.format("Scan complete in %.2fs, added %d entries to database.", time_taken, count)));
                 }
             }
         }
 
         @Override
-        public IMessage onMessage(SaveChunkScanReportMessage message, MessageContext ctx) {
+        public IMessage onMessage(SaveScanReportMessage message, MessageContext ctx) {
             if (ctx.side.isClient() && message.payload != null){
 
                 if (ScanDB.getLock() > 0)
                 {
-                    ScanDB.player().addChatMessage(new ChatComponentText("Scan already in progress. Try again later."));
+                    ScanDB.player().addChatMessage(new ChatComponentText("Another scan is in progress. Try again later."));
                 }
                 else
                 {
-                    new SaveChunkScanReportThread(message.payload).run();
+                    new SaveChunkScanReportThread(message.payload).start();
                 }
             }
             return null;

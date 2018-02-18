@@ -12,8 +12,8 @@ import cpw.mods.fml.relauncher.Side;
 import lime.chunk_miner.items.ModItems;
 import lime.chunk_miner.network.ClearScanDataMessage;
 import lime.chunk_miner.network.OpenScanRegistryMessage;
-import lime.chunk_miner.network.SaveChunkScanReportMessage;
-import lime.chunk_miner.network.ScanReportMessage;
+import lime.chunk_miner.network.SaveScanReportMessage;
+import lime.chunk_miner.network.PrintScanReportMessage;
 import lime.chunk_miner.proxy.CommonProxy;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -49,8 +49,8 @@ public class ChunkMiner {
 
         int n = 0;
         network = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
-        network.registerMessage(ScanReportMessage.Handler.class,          ScanReportMessage.class,          n++, Side.CLIENT);
-        network.registerMessage(SaveChunkScanReportMessage.Handler.class, SaveChunkScanReportMessage.class, n++, Side.CLIENT);
+        network.registerMessage(PrintScanReportMessage.Handler.class,     PrintScanReportMessage.class,     n++, Side.CLIENT);
+        network.registerMessage(SaveScanReportMessage.Handler.class,      SaveScanReportMessage.class,      n++, Side.CLIENT);
         network.registerMessage(OpenScanRegistryMessage.Handler.class,    OpenScanRegistryMessage.class,    n++, Side.CLIENT);
         network.registerMessage(ClearScanDataMessage.Handler.class,       ClearScanDataMessage.class,       n++, Side.CLIENT);
     }

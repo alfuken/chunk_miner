@@ -5,14 +5,13 @@ import ic2.core.audio.PositionSpec;
 import lime.chunk_miner.ChunkMiner;
 import lime.chunk_miner.Config;
 import lime.chunk_miner.Utils;
-import lime.chunk_miner.network.SaveChunkScanReportMessage;
+import lime.chunk_miner.network.SaveScanReportMessage;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
-
-import java.util.HashMap;
 
 
 public class AreaScanner extends Item {
@@ -25,11 +24,10 @@ public class AreaScanner extends Item {
     public ItemStack onItemRightClick(ItemStack itemStack, World w, EntityPlayer p) {
         if (w.isRemote) return itemStack;
 
-        HashMap scan_result = Utils.scan(w, (int)p.posX, (int)p.posZ, Config.area_scan_radius);
-        byte[] data = Utils.mapToNBT(scan_result);
-        System.out.println("Sending to "+p.getDisplayName()+" packet of size "+data.length+" bytes");
+        NBTTagList data = Utils.scan(w, (int)p.posX, (int)p.posZ, Config.area_scan_radius);
+        System.out.println("sending area scan="+data);
 
-        ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(data), (EntityPlayerMP) p);
+        ChunkMiner.network.sendTo(new SaveScanReportMessage(data), (EntityPlayerMP) p);
 
         if (!p.capabilities.isCreativeMode) --itemStack.stackSize;
 

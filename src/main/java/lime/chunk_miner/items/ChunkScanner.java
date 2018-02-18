@@ -4,15 +4,14 @@ import ic2.core.IC2;
 import ic2.core.audio.PositionSpec;
 import lime.chunk_miner.ChunkMiner;
 import lime.chunk_miner.Utils;
-import lime.chunk_miner.network.SaveChunkScanReportMessage;
-import lime.chunk_miner.network.ScanReportMessage;
+import lime.chunk_miner.network.SaveScanReportMessage;
+import lime.chunk_miner.network.PrintScanReportMessage;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
-
-import java.util.HashMap;
 
 
 public class ChunkScanner extends Item {
@@ -25,10 +24,9 @@ public class ChunkScanner extends Item {
     public ItemStack onItemRightClick(ItemStack itemStack, World w, EntityPlayer p) {
         if (w.isRemote) return itemStack;
 
-        HashMap scan_result = Utils.scan(w, (int)p.posX, (int)p.posZ);
-        byte[] data = Utils.mapToNBT(scan_result);
-        ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(data), (EntityPlayerMP) p);
-        ChunkMiner.network.sendTo(new ScanReportMessage(data), (EntityPlayerMP) p);
+        NBTTagList data = Utils.scan(w, (int)p.posX, (int)p.posZ);
+        ChunkMiner.network.sendTo(new SaveScanReportMessage(data), (EntityPlayerMP) p);
+        ChunkMiner.network.sendTo(new PrintScanReportMessage(data), (EntityPlayerMP) p);
 
 
         if (!p.capabilities.isCreativeMode) --itemStack.stackSize;

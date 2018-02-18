@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Level;
 public class Config {
     private static final String CS = "Scanner";
 
-    public static String[] ignored_materials = {"Chipped ", "Flawed ", "Crushed ", "Impure Pile of ", " Dust"};
+    public static String[] ignored_materials = {"Chipped ", "Flawed ", "Flawless ", "Exquisite ", "Crushed ", "Impure Pile of ", " Dust"};
     public static String  scan_mode          = "optimistic";
     public static int area_scan_radius       = 3;
 
@@ -23,7 +23,7 @@ public class Config {
         try {
             cfg.load();
 
-            ignored_materials = cfg.getStringList("Ignore these materials in scan report",     CS, ignored_materials, "List of substrings to ignore when 'Don't show poor ores' is set to 'true'. By default it ignores poor ores and cheap gems. Quarry still mines them though!");
+            ignored_materials = cfg.getStringList("Ignore these materials in scan results",    CS, ignored_materials, "List of substrings to ignore when 'Don't show poor ores' is set to 'true'. By default it ignores poor ores and cheap gems. Quarry still mines them though!");
             scan_mode         = cfg.getString("Scan mode",                                     CS, scan_mode,         "Ore scanning mode. Optimistic is fastest: considers valuable all blocks who's internal (unlocalized) name contains substring 'ore'. Classic is slower: uses the same mechanics as IC2 Ore Scanner.", new String[]{"optimistic", "classic"});
             area_scan_radius  = cfg.getInt("Area scan radius in chunks",                       CS, area_scan_radius, 1, 32, "Area scan radius in chunks. Value of 1 scans area 3x3 chunks. Value of 3 scans 7x7 (49) chunks. Higher the number, higher the load on CPU.");
 

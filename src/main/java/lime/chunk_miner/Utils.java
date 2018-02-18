@@ -10,6 +10,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fluids.FluidStack;
@@ -111,39 +112,30 @@ public class Utils {
         return false;
     }
 
-    public static HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> scan(World w, int player_x, int player_z)
+    public static NBTTagList scan(World w, int player_x, int player_z)
     {
         return scan(w, player_x, player_z, 0);
     }
 
-    public static HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> scan(World w, int player_x, int player_z, int radius)
+    public static NBTTagList scan(World w, int player_x, int player_z, int radius)
     {
-        //      X                Z                Item    Count                           X                Z                Item    Count
-        HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> theMap = new HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>>();
+        NBTTagList ret = new NBTTagList();
         Chunk c = w.getChunkFromBlockCoords(player_x, player_z);
 
-        for (int x = c.xPosition-radius; x <= c.xPosition+radius; x++) {
-            for (int z = c.zPosition-radius; z <= c.zPosition+radius; z++) {
-                try
-                {
-                    HashMap<Integer, HashMap<String, Integer>> x_value = theMap.get(x);
-
-                    if (x_value == null) x_value = new HashMap<Integer, HashMap<String, Integer>>();
-
-                    x_value.put(z, scanChunk(w.getChunkFromChunkCoords(x, z)));
-
-                    theMap.put(x, x_value);
-                }
-                catch (NoSuchElementException e){e.printStackTrace(System.out);}
+        for (int x = c.xPosition-radius; x <= c.xPosition+radius; x++)
+        {
+            for (int z = c.zPosition-radius; z <= c.zPosition+radius; z++)
+            {
+                ret.appendTag(scanChunk(w.getChunkFromChunkCoords(x, z)));
             }
         }
 
-        return theMap;
+        return ret;
     }
 
-    public static HashMap<String, Integer> scanChunk(Chunk c)
+    public static NBTTagCompound scanChunk(Chunk c)
     {
-        HashMap<String, Integer> ret = new HashMap<String, Integer>();
+        HashMap<String, Integer> map = new HashMap<String, Integer>();
         int meta;
         Block block;
         World w = c.worldObj;
@@ -157,9 +149,9 @@ public class Utils {
                     meta = w.getBlockMetadata(x, y, z);
                     for (ItemStack drop : block.getDrops(w, x, y, z, meta, 0)) {
                         String key = itemToString(drop);
-                        Integer count = ret.get(key);
+                        Integer count = map.get(key);
                         if (count == null) count = 0;
-                        ret.put(key, ++count);
+                        map.put(key, ++count);
                     }
                 }
             }
@@ -168,13 +160,22 @@ public class Utils {
         if (Loader.isModLoaded("gregtech")){
             FluidStack fluidStack = GT_UndergroundOil.undergroundOil(c, -1.0F);
             if (fluidStack != null){
-                String key = fluidToString(fluidStack);
-                ret.put(key, fluidStack.amount);
+                map.put(fluidToString(fluidStack), fluidStack.amount);
             }
         }
 
-        return sortByValue(ret);
+        map = sortByValue(map);
 
+        NBTTagCompound ret = new NBTTagCompound();
+        ret.setInteger("x", c.xPosition);
+        ret.setInteger("z", c.zPosition);
+
+        for(HashMap.Entry<String, Integer> e : map.entrySet())
+        {
+            ret.setInteger(e.getKey(), e.getValue());
+        }
+
+        return ret;
     }
 
     public static <K, V extends Comparable<? super V>> HashMap<K, V> sortByValue(HashMap<K, V> map) {
@@ -208,12 +209,15 @@ public class Utils {
 
     public static String tagToString(NBTTagCompound tag){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream os = new DataOutputStream(baos);
-        try {
+        DataOutputStream        os = new DataOutputStream(baos);
+        try
+        {
             CompressedStreamTools.write(tag, os);
             os.close();
             baos.close();
-        } catch (IOException io){
+        }
+        catch (IOException io)
+        {
             io.printStackTrace(System.out);
         }
 
@@ -259,60 +263,4 @@ public class Utils {
             return ItemStack.loadItemStackFromNBT(tag).getDisplayName();
         }
     }
-
-    public static NBTTagCompound mapToNBT(HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> map){
-        NBTTagCompound tag = new NBTTagCompound();
-
-        for(HashMap.Entry<Integer, HashMap<Integer, HashMap<String, Integer>>> x_entry : map.entrySet())
-        {
-            int x = x_entry.getKey();
-            NBTTagCompound x_value = new NBTTagCompound();
-
-            for(HashMap.Entry<Integer, HashMap<String, Integer>> z_entry : x_entry.getValue().entrySet())
-            {
-                int z = z_entry.getKey();
-                NBTTagCompound z_value = new NBTTagCompound();
-
-                for (HashMap.Entry<String, Integer> item_entry : z_entry.getValue().entrySet())
-                {
-                    z_value.setInteger(item_entry.getKey(), item_entry.getValue());
-                }
-
-                x_value.setTag(Integer.toString(z), z_value);
-            }
-
-            tag.setTag(Integer.toString(x), x_value);
-        }
-        return tag;
-    }
-
-    public static HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> mapFromNBT(NBTTagCompound tag){
-        HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> map = new HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>>();
-
-        for (Object _x_key : tag.func_150296_c()) {
-            String x_key = (String)_x_key;
-            NBTTagCompound x_value = tag.getCompoundTag(x_key);
-            HashMap<Integer, HashMap<String, Integer>> x_map = new HashMap<Integer, HashMap<String, Integer>>();
-
-            for (Object _z_key : x_value.func_150296_c()) {
-                String z_key = (String)_z_key;
-                NBTTagCompound z_value = tag.getCompoundTag(z_key);
-                HashMap<String, Integer> z_map = new HashMap<String, Integer>();
-
-                for (Object _item : z_value.func_150296_c()) {
-                    String item = (String)_item;
-                    int n = tag.getInteger(item);
-                    z_map.put(item, n);
-                }
-
-                x_map.put(Integer.parseInt(z_key), z_map);
-            }
-
-            map.put(Integer.parseInt(x_key), x_map);
-        }
-
-        return map;
-    }
-
-
 }
