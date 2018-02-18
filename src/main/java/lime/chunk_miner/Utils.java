@@ -229,72 +229,86 @@ public class Utils {
     }
 
     public static NBTTagCompound tagFromString(String s){
-        NBTTagCompound tag = new NBTTagCompound();
-
+        NBTTagCompound        tag = new NBTTagCompound();
         ByteArrayInputStream bais = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(s));
-        DataInputStream is = new DataInputStream(bais);
-        try {
+        DataInputStream        is = new DataInputStream(bais);
+
+        try
+        {
             tag = CompressedStreamTools.read(is);
             is.close();
             bais.close();
-        } catch (IOException io){
+        }
+        catch (IOException io)
+        {
             io.printStackTrace(System.out);
         }
 
         return tag;
     }
 
-    public static String nameFromString(String str){
-        NBTTagCompound tag = tagFromString(str);
-        if (isFluidTag(tag)){
+    public static String nameFromString(String s){
+        NBTTagCompound tag = tagFromString(s);
+
+        if (isFluidTag(tag))
+        {
             return FluidStack.loadFluidStackFromNBT(tag).getLocalizedName();
-        } else {
+        }
+        else
+        {
             return ItemStack.loadItemStackFromNBT(tag).getDisplayName();
         }
     }
 
-    public static String mapToString(HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> map){
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try
-        {
-            ObjectOutputStream os = new ObjectOutputStream(baos);
-            os.writeObject(map);
-            os.close();
-        }
-        catch (IOException io)
-        {
-            io.printStackTrace(System.out);
-        }
-        finally
-        {
-            try{baos.close();}catch(IOException io){io.printStackTrace(System.out);}
-        }
+    public static NBTTagCompound mapToNBT(HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> map){
+        NBTTagCompound tag = new NBTTagCompound();
 
-        return DatatypeConverter.printBase64Binary(baos.toByteArray());
+        for(HashMap.Entry<Integer, HashMap<Integer, HashMap<String, Integer>>> x_entry : map.entrySet())
+        {
+            int x = x_entry.getKey();
+            NBTTagCompound x_value = new NBTTagCompound();
+
+            for(HashMap.Entry<Integer, HashMap<String, Integer>> z_entry : x_entry.getValue().entrySet())
+            {
+                int z = z_entry.getKey();
+                NBTTagCompound z_value = new NBTTagCompound();
+
+                for (HashMap.Entry<String, Integer> item_entry : z_entry.getValue().entrySet())
+                {
+                    z_value.setInteger(item_entry.getKey(), item_entry.getValue());
+                }
+
+                x_value.setTag(Integer.toString(z), z_value);
+            }
+
+            tag.setTag(Integer.toString(x), x_value);
+        }
+        return tag;
     }
 
-    public static HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> mapFromString(String s){
-        HashMap map = new HashMap();
+    public static HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> mapFromNBT(NBTTagCompound tag){
+        HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> map = new HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>>();
 
-        ByteArrayInputStream bais = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(s));
-        try {
-            ObjectInputStream is = new ObjectInputStream(bais);
-            map = (HashMap) is.readObject();
-            is.close();
-            bais.close();
-        }
-        catch (IOException io)
-        {
-            io.printStackTrace(System.out);
-        }
-        catch(ClassNotFoundException c)
-        {
-            System.out.println("Class not found!");
-            c.printStackTrace(System.out);
-        }
-        finally
-        {
-            try{bais.close();}catch(IOException io){io.printStackTrace(System.out);}
+        for (Object _x_key : tag.func_150296_c()) {
+            String x_key = (String)_x_key;
+            NBTTagCompound x_value = tag.getCompoundTag(x_key);
+            HashMap<Integer, HashMap<String, Integer>> x_map = new HashMap<Integer, HashMap<String, Integer>>();
+
+            for (Object _z_key : x_value.func_150296_c()) {
+                String z_key = (String)_z_key;
+                NBTTagCompound z_value = tag.getCompoundTag(z_key);
+                HashMap<String, Integer> z_map = new HashMap<String, Integer>();
+
+                for (Object _item : z_value.func_150296_c()) {
+                    String item = (String)_item;
+                    int n = tag.getInteger(item);
+                    z_map.put(item, n);
+                }
+
+                x_map.put(Integer.parseInt(z_key), z_map);
+            }
+
+            map.put(Integer.parseInt(x_key), x_map);
         }
 
         return map;

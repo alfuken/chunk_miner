@@ -1,5 +1,7 @@
 package lime.chunk_miner.items;
 
+import ic2.core.IC2;
+import ic2.core.audio.PositionSpec;
 import lime.chunk_miner.ChunkMiner;
 import lime.chunk_miner.Utils;
 import lime.chunk_miner.network.SaveChunkScanReportMessage;
@@ -8,7 +10,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 
 import java.util.HashMap;
@@ -25,16 +26,15 @@ public class ChunkScanner extends Item {
         if (w.isRemote) return itemStack;
 
         HashMap scan_result = Utils.scan(w, (int)p.posX, (int)p.posZ);
-        String data = Utils.mapToString(scan_result);
-        NBTTagCompound payload = new NBTTagCompound();
-        payload.setString("payload", data);
-        ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(payload), (EntityPlayerMP) p);
+        byte[] data = Utils.mapToNBT(scan_result);
+        ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(data), (EntityPlayerMP) p);
         ChunkMiner.network.sendTo(new ScanReportMessage(data), (EntityPlayerMP) p);
 
 
         if (!p.capabilities.isCreativeMode) --itemStack.stackSize;
 
-        w.playSoundAtEntity(p, "IC2:Tools.ODScanner", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
+//        w.playSoundAtEntity(p, "IC2:Tools.ODScanner", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
+        IC2.audioManager.playOnce(p, PositionSpec.Hand, "Tools/ODScanner.ogg", true, IC2.audioManager.getDefaultVolume());
 
         return itemStack;
     }

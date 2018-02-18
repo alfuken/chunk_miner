@@ -1,6 +1,5 @@
 package lime.chunk_miner.network;
 
-import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
@@ -8,23 +7,24 @@ import io.netty.buffer.ByteBuf;
 import lime.chunk_miner.ChunkMiner;
 import lime.chunk_miner.Utils;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentText;
 
 import java.util.HashMap;
 
 public class ScanReportMessage implements IMessage {
     public ScanReportMessage(){}
-    private String payload;
+    private NBTTagCompound payload;
     public ScanReportMessage(String payload){
         this.payload = payload;
     }
 
     @Override public void toBytes(ByteBuf buf) {
-        ByteBufUtils.writeUTF8String(buf, payload);
+        buf.writeBytes(payload);
     }
 
     @Override public void fromBytes(ByteBuf buf) {
-        this.payload = ByteBufUtils.readUTF8String(buf);
+        buf.readBytes(this.payload);
     }
 
     public static class Handler implements IMessageHandler<ScanReportMessage, IMessage> {
@@ -35,7 +35,7 @@ public class ScanReportMessage implements IMessage {
             {
                 EntityPlayer p = ChunkMiner.proxy.getPlayer(ctx);
 
-                HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> map = Utils.mapFromString(message.payload);
+                HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> map = Utils.mapFromNBT(message.payload);
 
                 for(HashMap.Entry<Integer, HashMap<Integer, HashMap<String, Integer>>> x_entry : map.entrySet())
                 {

@@ -327,7 +327,7 @@ public class ScanDB {
         Statement qry = null;
         String sql = "CREATE TABLE IF NOT EXISTS scan_registry (" +
             " id integer PRIMARY KEY AUTOINCREMENT," +
-            " name varchar NOT NULL," +
+            " name text NOT NULL," +
             " item text NOT NULL," +
             " x integer NOT NULL," +
             " z integer NOT NULL," +
@@ -337,6 +337,9 @@ public class ScanDB {
 
         " CREATE INDEX name_scan_registry_idx"+
         " ON scan_registry (name);"+
+
+        " CREATE INDEX oil_scan_registry_idx"+
+        " ON scan_registry (oil);"+
 
         " CREATE INDEX main_scan_registry_idx"+
         " ON scan_registry (name, x, z);"+

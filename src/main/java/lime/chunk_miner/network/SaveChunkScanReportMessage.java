@@ -24,26 +24,27 @@ public class SaveChunkScanReportMessage implements IMessage {
     }
 
     @Override public void toBytes(ByteBuf buf) {
-        ByteBufUtils.writeTag(buf, payload);
+        ByteBufUtils.writeTag(this.payload);
     }
     @Override public void fromBytes(ByteBuf buf) {
-        this.payload = ByteBufUtils.readTag(buf);
+//        this.payload = new byte[buf.readableBytes()];
+        buf.readBytes(this.payload);
     }
 
     public static class Handler implements IMessageHandler<SaveChunkScanReportMessage, IMessage> {
 
         class SaveChunkScanReportThread extends Thread {
-            private String payload;
-            public SaveChunkScanReportThread(String payload) {
+            private NBTTagCompound tag;
+            public SaveChunkScanReportThread(NBTTagCompound tag) {
                 super();
-                this.payload = payload;
+                this.tag = tag;
             }
 
             public void run() {
                 ScanDB.lock();
                 ScanDB.initDB();
 
-                HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> map = Utils.mapFromString(payload);
+                HashMap<Integer, HashMap<Integer, HashMap<String, Integer>>> map = Utils.mapFromNBT(tag);
 
                 Connection conn = null;
                 PreparedStatement qry = null;
@@ -130,7 +131,7 @@ public class SaveChunkScanReportMessage implements IMessage {
                 }
                 else
                 {
-                    new SaveChunkScanReportThread(message.payload.getString("payload")).start();
+                    new SaveChunkScanReportThread(message.payload).run();
                 }
             }
             return null;
@@ -142,7 +143,7 @@ public class SaveChunkScanReportMessage implements IMessage {
 
 /*
 *
-//                NBTTagCompound nbt = message.payload;
+//                NBTTagCompound nbt = message.data;
 //                int x = nbt.getInteger("x");
 //                int z = nbt.getInteger("z");
 //                ScanDB.i(i).delete(x, z);

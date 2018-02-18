@@ -182,10 +182,8 @@ public class ChunkMinerTile extends TileEntity {
         if (getOwner() != null) {
             getOwner().addChatMessage(new ChatComponentText("> Miner at " + this.xCoord + ":" + this.zCoord + " have finished mining."));
             HashMap scan_result = Utils.scan(this.getWorldObj(), this.xCoord, this.zCoord);
-            String data = Utils.mapToString(scan_result);
-            NBTTagCompound payload = new NBTTagCompound();
-            payload.setString("payload", data);
-            ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(payload), (EntityPlayerMP) getOwner());
+            byte[] data = Utils.mapToNBT(scan_result);
+            ChunkMiner.network.sendTo(new SaveChunkScanReportMessage(data), (EntityPlayerMP) getOwner());
         }
         if (Config.selfdestruct) {
             getWorldObj().setBlockToAir(this.xCoord, this.yCoord, this.zCoord);
