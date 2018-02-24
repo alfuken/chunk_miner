@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.chunk.Chunk;
 
+import java.awt.*;
 import java.util.Map;
 
 public class MapPane extends GlassPane {
@@ -96,7 +97,7 @@ public class MapPane extends GlassPane {
         int y_center_for_y_coord_legend = 180;
         add(hor_line(x_lvl_for_hor_line, y_center_for_y_coord_legend - 75 + 3));
         add(hor_line(x_lvl_for_hor_line, y_center_for_y_coord_legend - 36 + 3));
-        add(hor_line(x_lvl_for_hor_line, y_center_for_y_coord_legend      + 3));
+        add(hor_line(x_lvl_for_hor_line, y_center_for_y_coord_legend      + 3, 0x88000000));
         add(hor_line(x_lvl_for_hor_line, y_center_for_y_coord_legend + 36 + 3));
         add(hor_line(x_lvl_for_hor_line, y_center_for_y_coord_legend + 75 + 3));
         add(lbl(pz-(25*16)+"", x_lvl_for_y_coord_legend, y_center_for_y_coord_legend-75));
@@ -110,7 +111,7 @@ public class MapPane extends GlassPane {
         int x_center_for_x_coord_legend = -13;
         add(ver_line(x_center_for_x_coord_legend - 75 - 4, y_lvl_for_ver_line));
         add(ver_line(x_center_for_x_coord_legend - 36 - 4, y_lvl_for_ver_line));
-        add(ver_line(x_center_for_x_coord_legend      - 4, y_lvl_for_ver_line));
+        add(ver_line(x_center_for_x_coord_legend      - 4, y_lvl_for_ver_line, 0x88000000));
         add(ver_line(x_center_for_x_coord_legend + 36 - 4, y_lvl_for_ver_line));
         add(ver_line(x_center_for_x_coord_legend + 75 - 4, y_lvl_for_ver_line));
 
@@ -129,20 +130,16 @@ public class MapPane extends GlassPane {
         add(lbl("Colour values", -111, 297));
 
         int big_cell_y_lvl = 307;
-        int big_cell_step = 26;
+        int big_cell_step = 1;
         int base = -111-big_cell_step;
-        add(bigger_cell(base += big_cell_step, big_cell_y_lvl, count2colour(1)));
-        add(bigger_cell(base += big_cell_step, big_cell_y_lvl, count2colour(31)));
-        add(bigger_cell(base += big_cell_step, big_cell_y_lvl, count2colour(101)));
-        add(bigger_cell(base += big_cell_step, big_cell_y_lvl, count2colour(501)));
-        add(bigger_cell(base += big_cell_step, big_cell_y_lvl, count2colour(1001)));
+        for(int i = 0; i <= 200; i++){
+            add(bigger_cell(base += big_cell_step, big_cell_y_lvl, count2colour(i*5)));
+        }
 
         int y_level_for_colour_legend = 316;
         add(lbl("1",     -111, y_level_for_colour_legend));
-        add(lbl("30",    -92,  y_level_for_colour_legend));
-        add(lbl("100",   -66,  y_level_for_colour_legend));
-        add(lbl("500",   -42,  y_level_for_colour_legend));
-        add(lbl("1000+", -17,  y_level_for_colour_legend));
+        add(lbl("500",   -11,  y_level_for_colour_legend));
+        add(lbl("1000+", 80,   y_level_for_colour_legend));
     }
 
     /* ============================================================================================================== */
@@ -239,20 +236,28 @@ public class MapPane extends GlassPane {
 
     private PaneBox bigger_cell(int x_offset, int y_offset, int colour){
         PaneBox box = basicBox(x_offset, y_offset, colour);
-        box.setWidth(26);
+        box.setWidth(1);
         box.setHeight(5);
         box.setZIndex(1);
         return box;
     }
 
-    private int count2colour(int n){
-             if (n >= 1   && n <= 30)        return 0x20000000;
-        else if (n >= 31  && n <= 100)       return 0x50000000;
-        else if (n >= 101 && n <= 500)       return 0x90000000;
-        else if (n >= 501 && n <= 1000)      return 0xb0000000;
-        else if (n >  1000)                  return 0xe0000000;
-        else                                 return 0x00ffffff;
+    public int count2colour(int n){
+        float index = (float)n;
+        if (index >= 1000f) index = 1000f;
+//        index = index-40f/360f;
+        index = (index*(300f/1000f))/360f;
+        return Color.HSBtoRGB(index, 0.8f, 1.0f);
     }
+
+//    private int count2colour(int n){
+//             if (n >= 1   && n <= 30)        return 0x20000000;
+//        else if (n >= 31  && n <= 100)       return 0x50000000;
+//        else if (n >= 101 && n <= 500)       return 0x90000000;
+//        else if (n >= 501 && n <= 1000)      return 0xb0000000;
+//        else if (n >  1000)                  return 0xe0000000;
+//        else                                 return 0x00ffffff;
+//    }
 
 //    private int count2colour(int n){
 //             if (n >= 1   && n <= 20)        return 0x99e22f02;

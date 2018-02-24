@@ -71,6 +71,7 @@ public class SaveScanReportMessage implements IMessage {
                         NBTTagCompound tag = payload.getCompoundTagAt(i);
                         int x = tag.getInteger("x");
                         int z = tag.getInteger("z");
+                        ScanDB.delete(x, z);
 
                         for (Object _item : tag.func_150296_c())
                         {
