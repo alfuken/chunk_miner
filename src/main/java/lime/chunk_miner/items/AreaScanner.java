@@ -25,7 +25,6 @@ public class AreaScanner extends Item {
         if (w.isRemote) return itemStack;
 
         NBTTagList data = Utils.scan(w, (int)p.posX, (int)p.posZ, Config.area_scan_radius);
-        System.out.println("sending area scan="+data);
 
         ChunkMiner.network.sendTo(new SaveScanReportMessage(data), (EntityPlayerMP) p);
 

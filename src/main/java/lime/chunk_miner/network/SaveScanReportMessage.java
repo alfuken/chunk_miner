@@ -7,6 +7,8 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import lime.chunk_miner.ScanDB;
 import lime.chunk_miner.Utils;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ChatComponentText;
@@ -56,9 +58,9 @@ public class SaveScanReportMessage implements IMessage {
 
                 Connection conn = null;
                 PreparedStatement qry = null;
-                String sql = "INSERT INTO scan_registry(name, item, x, z, n, oil) VALUES(?,?,?,?,?,?);";
+                String sql = "INSERT INTO scan_registry(name, item, x, z, n, oil, dim) VALUES(?,?,?,?,?,?,?);";
                 int count = 0;
-                final int batchSize = 1000;
+                final int batchSize = 400;
 
                 try
                 {
@@ -81,7 +83,20 @@ public class SaveScanReportMessage implements IMessage {
                             {
                                 String name = Utils.nameFromString(item);
 
-                                if (!Utils.shouldBeSkipped(name))
+                                boolean skip = Utils.shouldBeSkipped(name);
+
+                                if (skip)
+                                {
+                                    NBTTagCompound itemtag = Utils.tagFromString(item);
+                                    if (!Utils.isFluidTag(itemtag)){
+                                        ItemStack the_item = Utils.itemFromString(item);
+                                        if (the_item.getItem() == Items.glowstone_dust){
+                                            skip = false;
+                                        }
+                                    }
+                                }
+
+                                if (skip == false)
                                 {
                                     int n = tag.getInteger(item);
                                     int oil = (
@@ -98,6 +113,7 @@ public class SaveScanReportMessage implements IMessage {
                                     qry.setInt(4, z);
                                     qry.setInt(5, n);
                                     qry.setInt(6, oil);
+                                    qry.setInt(7,ScanDB.player().dimension);
                                     qry.addBatch();
 
                                     if(++count % batchSize == 0) {

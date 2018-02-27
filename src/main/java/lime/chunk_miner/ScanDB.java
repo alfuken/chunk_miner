@@ -12,16 +12,17 @@ import java.util.Map;
 
 public class ScanDB {
     private static long locked_at = 0;
-    private static boolean dbSetUp = false;
+    private static boolean dbInitialized = false;
 
     public ScanDB(){}
 
     public static void initDB(){
-        if (!dbSetUp){
+        if (!dbInitialized){
             if (!ScanDB.isDBSetUp()) {
                 ScanDB.setupPlayerDB();
-                dbSetUp = true;
             }
+            ScanDB.migratePlayerDB1();
+            dbInitialized = true;
         }
     }
 
@@ -79,13 +80,14 @@ public class ScanDB {
         Connection         conn = null;
         PreparedStatement  qry  = null;
         ResultSet          r    = null;
-        String             sql  = "SELECT DISTINCT name FROM scan_registry WHERE oil = ? ORDER BY name;";
+        String             sql  = "SELECT DISTINCT name FROM scan_registry WHERE oil = ? AND dim = ? ORDER BY name;";
         List<String>       ret  = new ArrayList<String>();
         try
         {
             conn = DriverManager.getConnection(dbFile());
             qry = conn.prepareStatement(sql);
             qry.setInt(1, oil);
+            qry.setInt(2, player().dimension);
             r = qry.executeQuery();
 
             while (r.next())
@@ -128,7 +130,7 @@ public class ScanDB {
         Connection         conn = null;
         PreparedStatement  qry  = null;
         ResultSet          r    = null;
-        String             sql  = "SELECT * FROM scan_registry WHERE name = ? AND x BETWEEN ? AND ? AND z BETWEEN ? and ?;";
+        String             sql  = "SELECT * FROM scan_registry WHERE name = ? AND x BETWEEN ? AND ? AND z BETWEEN ? and ? AND dim = ?;";
         Map<Integer, Map<Integer, Integer>> map = new HashMap<Integer, Map<Integer, Integer>>();
 
         try
@@ -140,6 +142,7 @@ public class ScanDB {
             qry.setInt(3,x+range);
             qry.setInt(4,z-range);
             qry.setInt(5,z+range);
+            qry.setInt(6,player().dimension);
             r = qry.executeQuery();
 
             while (r.next())
@@ -172,7 +175,7 @@ public class ScanDB {
         Connection        conn = null;
         PreparedStatement qry  = null;
         ResultSet         r    = null;
-        String            sql  = "SELECT * FROM scan_registry WHERE name = ? ORDER BY n DESC;";
+        String            sql  = "SELECT * FROM scan_registry WHERE name = ? AND dim = ? ORDER BY n DESC;";
         List<String>      ret  = new ArrayList<String>();
 
         try
@@ -180,6 +183,7 @@ public class ScanDB {
             conn = DriverManager.getConnection(dbFile());
             qry = conn.prepareStatement(sql);
             qry.setString(1,name);
+            qry.setInt(2,player().dimension);
             r = qry.executeQuery();
 
             while (r.next())
@@ -206,7 +210,7 @@ public class ScanDB {
         initDB();
         Connection conn = null;
         PreparedStatement qry = null;
-        String sql = "DELETE FROM scan_registry WHERE x = ? AND z = ?";
+        String sql = "DELETE FROM scan_registry WHERE x = ? AND z = ? AND dim = ?";
 
         try
         {
@@ -214,6 +218,7 @@ public class ScanDB {
             qry = conn.prepareStatement(sql);
             qry.setInt(1, x);
             qry.setInt(2, z);
+            qry.setInt(3,player().dimension);
             qry.executeUpdate();
         }
         catch (SQLException e)
@@ -257,7 +262,7 @@ public class ScanDB {
         initDB();
         Connection        conn = null;
         PreparedStatement qry  = null;
-        String            sql  = "INSERT INTO scan_registry(name, item, x, z, n, oil) VALUES(?,?,?,?,?,?);";
+        String            sql  = "INSERT INTO scan_registry(name, item, x, z, n, oil, dim) VALUES(?,?,?,?,?,?,?);";
         String            name = Utils.nameFromString(item);
         int               oil  = 0;
 
@@ -280,6 +285,7 @@ public class ScanDB {
             qry.setInt(4, z);
             qry.setInt(5, n);
             qry.setInt(6, oil);
+            qry.setInt(7,player().dimension);
             qry.executeUpdate();
         }
         catch (SQLException e)
@@ -322,6 +328,50 @@ public class ScanDB {
         return set_up;
     }
 
+    private static void migratePlayerDB1()
+    {
+        Connection conn = null;
+        Statement qry = null;
+        String sql = "ALTER TABLE scan_registry ADD COLUMN dim integer default 0;"+
+
+                " CREATE INDEX name_scan_registry_idx2"+
+                " ON scan_registry (name, dim);"+
+
+                " CREATE INDEX oil_scan_registry_idx2"+
+                " ON scan_registry (oil, dim);"+
+
+                " CREATE INDEX main_scan_registry_idx2"+
+                " ON scan_registry (name, x, z, dim);"+
+
+                " CREATE INDEX oil_scan_registry_idx2"+
+                " ON scan_registry (oil, x, z, dim);" +
+
+                " UPDATE scan_registry SET dim = 0;";
+
+        try {
+            conn = DriverManager.getConnection(dbFile());
+            DatabaseMetaData md = conn.getMetaData();
+            ResultSet rset = md.getColumns(null, null, "scan_registry", null);
+
+            boolean got_dim = false;
+            while (rset.next())
+            {
+                if (rset.getString(4).equals("dim")) got_dim = true;
+            }
+
+            if (!got_dim)
+            {
+                qry = conn.createStatement();
+                qry.execute(sql);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(System.out);
+        } finally {
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
+        }
+    }
+
     private static void setupPlayerDB()
     {
         Connection conn = null;
@@ -334,6 +384,7 @@ public class ScanDB {
             " z integer NOT NULL," +
             " n integer NOT NULL," +
             " oil integer default 0" +
+            " dim integer default 0" +
         ");"+
 
         " CREATE INDEX name_scan_registry_idx"+

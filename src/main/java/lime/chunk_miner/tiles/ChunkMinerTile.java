@@ -135,8 +135,8 @@ public class ChunkMinerTile extends TileEntity {
     }
 
     private int mineFromY(){
-//        return this.worldObj.getChunkFromBlockCoords(this.xCoord, this.zCoord).getTopFilledSegment() + 16;
-        return this.yCoord - 1;
+        return this.worldObj.getChunkFromBlockCoords(this.xCoord, this.zCoord).getTopFilledSegment() + 16;
+//        return this.yCoord - 1;
     }
 
     private boolean work() {

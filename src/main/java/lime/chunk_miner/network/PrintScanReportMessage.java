@@ -8,6 +8,8 @@ import io.netty.buffer.ByteBuf;
 import lime.chunk_miner.ChunkMiner;
 import lime.chunk_miner.Utils;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ChatComponentText;
@@ -36,21 +38,37 @@ public class PrintScanReportMessage implements IMessage {
     public static class Handler implements IMessageHandler<PrintScanReportMessage, IMessage> {
 
         @Override
-        public IMessage onMessage(PrintScanReportMessage message, MessageContext ctx) {
+        public IMessage onMessage(PrintScanReportMessage message, MessageContext ctx)
+        {
             if (ctx.side.isClient() && message.payload != null)
             {
                 EntityPlayer p = ChunkMiner.proxy.getPlayer(ctx);
 
-                for (int i = 0; i < message.payload.tagCount(); i++) {
+                for (int i = 0; i < message.payload.tagCount(); i++)
+                {
                     HashMap<String, Integer> map = new HashMap<String, Integer>();
                     NBTTagCompound tag = message.payload.getCompoundTagAt(i);
                     int x = tag.getInteger("x");
                     int z = tag.getInteger("z");
-                    for (Object _item : tag.func_150296_c()) {
+
+                    for (Object _item : tag.func_150296_c())
+                    {
                         String item = (String)_item;
-                        if (!item.equals("x") && !item.equals("z")){
+                        if (!item.equals("x") && !item.equals("z"))
+                        {
                             String name = Utils.nameFromString(item);
-                            if (!Utils.shouldBeSkipped(name)){
+                            if (Utils.shouldBeSkipped(name))
+                            {
+                                NBTTagCompound itemtag = Utils.tagFromString(item);
+                                if (!Utils.isFluidTag(itemtag)){
+                                    ItemStack the_item = Utils.itemFromString(item);
+                                    if (the_item.getItem() == Items.glowstone_dust){
+                                        map.put(name, tag.getInteger(item));
+                                    }
+                                }
+                            }
+                            else
+                            {
                                 map.put(name, tag.getInteger(item));
                             }
 

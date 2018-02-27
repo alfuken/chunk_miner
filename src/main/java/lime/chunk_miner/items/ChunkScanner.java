@@ -28,7 +28,6 @@ public class ChunkScanner extends Item {
         ChunkMiner.network.sendTo(new SaveScanReportMessage(data), (EntityPlayerMP) p);
         ChunkMiner.network.sendTo(new PrintScanReportMessage(data), (EntityPlayerMP) p);
 
-
         if (!p.capabilities.isCreativeMode) --itemStack.stackSize;
 
 //        w.playSoundAtEntity(p, "IC2:Tools.ODScanner", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));

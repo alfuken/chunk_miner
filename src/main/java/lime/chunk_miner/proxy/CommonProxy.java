@@ -48,15 +48,17 @@ public class CommonProxy {
                 'S', Items.stick, 'D', Blocks.dirt
         );
 
+        GameRegistry.addRecipe(new ItemStack(ModItems.area_scanner),
+                "SDS",
+                "DAD",
+                "SDS",
+                'S', Items.stick, 'D', Blocks.dirt, 'A', Items.apple
+        );
+
         GameRegistry.addShapelessRecipe(new ItemStack(ModItems.area_scanner),
+                ModItems.chunk_scanner,
                 ModItems.chunk_scanner,
                 Items.apple
-        );
-        GameRegistry.addShapelessRecipe(new ItemStack(ModItems.area_scanner),
-                ModItems.chunk_scanner,
-                ModItems.chunk_scanner,
-                ModItems.chunk_scanner,
-                Items.egg
         );
 
         GameRegistry.addRecipe(new ItemStack(ModItems.scan_registry),

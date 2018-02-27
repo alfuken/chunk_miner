@@ -1,7 +1,9 @@
 package lime.chunk_miner;
 
 import cpw.mods.fml.common.Loader;
+import gregtech.GT_Mod;
 import gregtech.common.GT_UndergroundOil;
+import gregtech.common.blocks.GT_Block_Ores_Abstract;
 import ic2.api.recipe.IRecipeInput;
 import ic2.core.IC2;
 import lime.chunk_miner.blocks.ChunkMinerBlock;
@@ -15,6 +17,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidBlock;
+import org.apache.commons.lang3.ArrayUtils;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
@@ -36,7 +39,7 @@ public class Utils {
 
     public static boolean genericMineable(Block block){
         if (Config.scan_mode.equals("optimistic")){
-            return (potentiallyValuableBlock(block));
+            return (potentiallyValuableBlock2(block));
         } else if (Config.scan_mode.equals("pessimistic")){
             return (potentiallyValuableBlock2(block));
         } else {
@@ -63,22 +66,26 @@ public class Utils {
     }
 
     public static boolean potentiallyValuableBlock2(Block block){
+        if (Loader.isModLoaded("gregtech") && block instanceof GT_Block_Ores_Abstract) return true;
         String n = block.getUnlocalizedName();
-        return (n.equals("gt.blockores") ||
-                n.startsWith("tile.ore") ||
-                n.startsWith("blockOre")
+        return (block instanceof BlockOre
+            || n.startsWith("tile.ore")
+            || n.startsWith("blockOre")
+            || n.equals("gt.blockores")
+            || block instanceof BlockGlowstone
         );
     }
 
     public static boolean potentiallyValuableBlock(Block block){
-        return (block.getUnlocalizedName().contains("ore"));
+        return (block.getUnlocalizedName().contains("ore") || block instanceof BlockGlowstone);
     }
 
     public static boolean trashBlock(Block block){
-        return !mineable(block) || (block == null
-             || block instanceof BlockStone
-             || block instanceof ChunkMinerBlock
+        return (block == null
              || block instanceof BlockAir
+             || block.equals(Blocks.stone)
+             || !mineable(block)
+             || block instanceof ChunkMinerBlock
              || block instanceof BlockDirt
              || block instanceof IFluidBlock
              || block instanceof BlockLiquid
@@ -94,8 +101,11 @@ public class Utils {
 
     public static boolean genericMineable(World w, int x, int y, int z){
         Block block = w.getBlock(x, y, z);
+//        if (!trashBlock(block)){
+//            System.out.println("-"+block+"/"+block.getUnlocalizedName()+" at "+x+":"+y+":"+z+ " = "+potentiallyValuableBlock2(block));
+//        }
         if (Config.scan_mode.equals("optimistic")){
-            return (potentiallyValuableBlock(block));
+            return (potentiallyValuableBlock2(block));
         } else if (Config.scan_mode.equals("pessimistic")){
             return (potentiallyValuableBlock2(block));
         } else if (Config.scan_mode.equals("classic")) {
@@ -158,9 +168,12 @@ public class Utils {
         }
 
         if (Loader.isModLoaded("gregtech")){
-            FluidStack fluidStack = GT_UndergroundOil.undergroundOil(c, -1.0F);
-            if (fluidStack != null){
-                map.put(fluidToString(fluidStack), fluidStack.amount);
+            int[] blacklist = GT_Mod.gregtechproxy.mUndergroundOil.BlackList;
+            if (w.provider.dimensionId != -1 && w.provider.dimensionId != 1){
+                FluidStack fluidStack = GT_UndergroundOil.undergroundOil(c, -1.0F);
+                if (fluidStack != null){
+                    map.put(fluidToString(fluidStack), fluidStack.amount);
+                }
             }
         }
 

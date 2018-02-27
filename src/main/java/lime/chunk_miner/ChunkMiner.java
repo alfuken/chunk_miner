@@ -25,7 +25,7 @@ public class ChunkMiner {
 
     public static final String MODID = "chunk_miner";
     public static final String MODNAME = "Chunk Miner";
-    public static final String VERSION = "1.7.10-3";
+    public static final String VERSION = "1.7.10-4";
     public static final String DEPENDENCIES = "required-after:IC2";
     public static Logger logger;
     public static Configuration config;
