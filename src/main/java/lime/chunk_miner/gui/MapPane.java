@@ -66,7 +66,7 @@ public class MapPane extends GlassPane {
 
         boolean center_taken = false;
 
-        Map<Integer, Map<Integer, Integer>> coords = ScanDB.get(name, chunk.xPosition, chunk.zPosition, 31);
+        Map<Integer, Map<Integer, Integer>> coords = ScanDB.get_with_blanks(name, chunk.xPosition, chunk.zPosition, 31);
 
         for(Map.Entry<Integer, Map<Integer, Integer>> e : coords.entrySet()){
             int x = e.getKey();
@@ -74,8 +74,12 @@ public class MapPane extends GlassPane {
             for(Map.Entry<Integer, Integer> ee : zn.entrySet()){
                 int z = ee.getKey();
                 int n = ee.getValue();
-                String label = String.valueOf(n)+" @ "+(x*16+8)+":"+(z*16+8);
-                int colour = count2colour(n);
+                String label = "";
+                int colour = 0x22000000;
+                if (n > 0){
+                    label = String.valueOf(n)+" @ "+(x*16+8)+":"+(z*16+8);
+                    colour = count2colour(n);
+                }
                 add(cell(x-center_x, z-center_z, colour, label));
 
                 if (x-center_x == 0 && z-center_z == 0) center_taken = true;
@@ -174,7 +178,7 @@ public class MapPane extends GlassPane {
     }
 
     private PaneBox hor_line(int x, int y){
-        return hor_line(x, y, 0x44000000);
+        return hor_line(x, y, 0x55000000);
     }
     private PaneBox hor_line(int x, int y, int colour){
         int width = 193;
@@ -186,7 +190,7 @@ public class MapPane extends GlassPane {
     }
 
     private PaneBox ver_line(int x, int y){
-        return ver_line(x, y, 0x44000000);
+        return ver_line(x, y, 0x55000000);
     }
 
     private PaneBox ver_line(int x, int y, int colour){

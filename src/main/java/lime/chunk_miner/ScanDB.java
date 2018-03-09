@@ -169,6 +169,54 @@ public class ScanDB {
         return map;
     }
 
+    public static Map<Integer, Map<Integer, Integer>> get_with_blanks(String name, int x, int z, int range)
+    {
+        initDB();
+        Connection         conn = null;
+        PreparedStatement  qry  = null;
+        ResultSet          r    = null;
+        String             sql  = "SELECT * FROM scan_registry WHERE x BETWEEN ? AND ? AND z BETWEEN ? and ? AND dim = ?;";
+        Map<Integer, Map<Integer, Integer>> map = new HashMap<Integer, Map<Integer, Integer>>();
+
+        try
+        {
+            conn = DriverManager.getConnection(dbFile());
+            qry = conn.prepareStatement(sql);
+            qry.setInt(1,x-range);
+            qry.setInt(2,x+range);
+            qry.setInt(3,z-range);
+            qry.setInt(4,z+range);
+            qry.setInt(5,player().dimension);
+            r = qry.executeQuery();
+
+            while (r.next())
+            {
+                Map<Integer, Integer> map_x = map.get(r.getInt("x"));
+                if (map_x == null)    map_x = new HashMap<Integer, Integer>();
+
+                if (r.getString("name").equals(name)){
+                    map_x.put(r.getInt("z"), r.getInt("n"));
+                } else if (map_x.get(r.getInt("z")) == null) {
+                    map_x.put(r.getInt("z"), -1);
+                }
+
+                map.put(r.getInt("x"), map_x);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace(System.out);
+        }
+        finally
+        {
+            if (r    != null) {try { r.close();    } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
+        }
+
+        return map;
+    }
+
     public static List<String> get(String name)
     {
         initDB();
