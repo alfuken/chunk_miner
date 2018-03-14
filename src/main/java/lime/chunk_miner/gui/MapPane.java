@@ -4,28 +4,131 @@ import gminers.glasspane.GlassPane;
 import gminers.glasspane.HorzAlignment;
 import gminers.glasspane.component.PaneBox;
 import gminers.glasspane.component.button.PaneButton;
+import gminers.glasspane.component.button.PaneCheckBox;
 import gminers.glasspane.component.text.PaneLabel;
 import lime.chunk_miner.ScanDB;
+import lime.chunk_miner.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.fluids.FluidStack;
 
 import java.awt.*;
-import java.util.Map;
+import java.util.ArrayList;
 
 public class MapPane extends GlassPane {
 
-    public MapPane(final String name){
-        final EntityPlayer p = Minecraft.getMinecraft().thePlayer;
-        int px = (int)p.posX;
-        int pz = (int)p.posZ;
+    public ArrayList<String> oils = new ArrayList<String>();
+    public ArrayList<PaneBox> cells = new ArrayList<PaneBox>();
+    public String oreName = "";
+
+    public MapPane(final String oreName){
+        this.oreName = oreName;
         setRevertAllowed(true);
         setName("MapPane");
         setShadowbox(null);
+        draw();
+    }
 
+    /* ============================================================================================================== */
+    /* ============================================================================================================== */
+    /* ============================================================================================================== */
+
+    void draw(){
         add(GuiHelpers.book_background());
         add(GuiHelpers.back_button());
+        add_grid_and_labels();
+        add(coords_button(this.oreName));
 
+        if (this.oreName.equals("All Oil and Gas"))
+        {
+            render_oil_controls();
+            render_oils();
+        }
+        else
+        {
+            render_ores();
+        }
+    }
+
+    void render_oil_controls(){
+        final MapPane pane = this;
+        if (oils.isEmpty()){
+            oils.addAll(ScanDB.get_oil_names());
+        }
+
+        int x_offset = -90;
+        for (String name : ScanDB.get_oil_names()){
+            if (name == null || name.equals("")) continue;
+
+            final PaneCheckBox checkBox = new PaneCheckBox(name);
+            checkBox.setAutoPositionX(true);
+            checkBox.setRelativeX(0.5D);
+            checkBox.setRelativeXOffset(x_offset);
+            checkBox.setY(45);
+            checkBox.setShadow(false);
+            checkBox.setSelected(oils.contains(name));
+            checkBox.registerActivationListener(new Runnable() {
+                @Override
+                public void run() {
+                    if (checkBox.isSelected()){
+                        oils.add(checkBox.getText());
+                    } else {
+                        oils.remove(checkBox.getText());
+                    }
+                    pane.render_oils();
+                }
+            });
+
+            add(checkBox);
+
+            x_offset += checkBox.getWidth()/3;
+        }
+
+    }
+
+    void render_oils(){
+        clear_cells();
+        final EntityPlayer p = Minecraft.getMinecraft().thePlayer;
+        Chunk chunk = p.worldObj.getChunkFromBlockCoords((int)p.posX, (int)p.posZ);
+        ArrayList<int[]> coords = ScanDB.get_grey_area(chunk.xPosition, chunk.zPosition, 31);
+
+        int center_x = chunk.xPosition;
+        int center_z = chunk.zPosition;
+
+        for(int[] e : coords){
+            int x = e[0];
+            int z = e[1];
+            FluidStack fluid = Utils.getOilInChunk(p.worldObj.getChunkFromChunkCoords(x, z));
+            if (fluid.amount > 0){
+                add_cell(x-center_x, z-center_z, count2colour(fluid.amount), fluid.amount+" "+fluid.getLocalizedName());
+            }
+        }
+
+//        for (String name : oils){
+//            ArrayList<int[]> crds = ScanDB.get(name, chunk.xPosition, chunk.zPosition, 31);
+//            render_cells();
+//        }
+
+    }
+
+    void render_ores(){
+        final EntityPlayer p = Minecraft.getMinecraft().thePlayer;
+
+        clear_cells();
+        render_greys();
+        render_cells();
+
+        PaneLabel label = new PaneLabel(this.oreName+"\noccurences map (chunks)");
+        label.setAutoResizeWidth(true);
+        label.setAlignmentX(HorzAlignment.MIDDLE);
+        label.setY(45);
+        label.setColor(0xff000000);
+        label.setShadow(false);
+        add(label);
+    }
+
+    PaneButton coords_button(final String name){
         PaneButton coords_button = new PaneButton("coords");
         coords_button.setWidth(45);
         coords_button.setHeight(15);
@@ -39,62 +142,65 @@ public class MapPane extends GlassPane {
                 new CoordinatesListPane(name).show();
             }
         });
-        add(coords_button);
+        return coords_button;
+    }
 
-
-        PaneBox bg_box;
-        for (int bg_x = 0; bg_x <= 12; bg_x++) {
-            for (int bg_y = 0; bg_y <= 12; bg_y++) {
-                if ((bg_x % 2 == 0 && bg_y % 2 == 0) || (bg_x % 2 == 1 && bg_y % 2 == 1)) {
-                    bg_box = background_tile_dark(bg_x, bg_y);
-                } else {
-                    bg_box = background_tile_light(bg_x, bg_y);
-                }
-
-                if (bg_x == 6) bg_box.setWidth(3);
-                if (bg_y == 6) bg_box.setHeight(3);
-                if (bg_x > 6) bg_box.setRelativeXOffset(bg_box.getRelativeXOffset() - 15 + 3);
-                if (bg_y > 6) bg_box.setY(bg_box.getY() - 15 + 3);
-
-//                add(bg_box);
-            }
-        }
-
+    void render_cells(){
+        final EntityPlayer p = Minecraft.getMinecraft().thePlayer;
+        int px = (int)p.posX;
+        int pz = (int)p.posZ;
         Chunk chunk = p.worldObj.getChunkFromBlockCoords(px, pz);
+        ArrayList<int[]> coords = ScanDB.get(this.oreName, chunk.xPosition, chunk.zPosition, 31);
+
         int center_x = chunk.xPosition;
         int center_z = chunk.zPosition;
 
         boolean center_taken = false;
 
-        Map<Integer, Map<Integer, Integer>> coords = ScanDB.get_with_blanks(name, chunk.xPosition, chunk.zPosition, 31);
+        for(int[] e : coords){
+            int x = e[0];
+            int z = e[1];
+            int n = e[2];
+            add_cell(x-center_x, z-center_z, count2colour(n), String.valueOf(n)+" @ "+(x*16+8)+":"+(z*16+8));
 
-        for(Map.Entry<Integer, Map<Integer, Integer>> e : coords.entrySet()){
-            int x = e.getKey();
-            Map<Integer, Integer> zn = e.getValue();
-            for(Map.Entry<Integer, Integer> ee : zn.entrySet()){
-                int z = ee.getKey();
-                int n = ee.getValue();
-                String label = "";
-                int colour = 0x22000000;
-                if (n > 0){
-                    label = String.valueOf(n)+" @ "+(x*16+8)+":"+(z*16+8);
-                    colour = count2colour(n);
-                }
-                add(cell(x-center_x, z-center_z, colour, label));
-
-                if (x-center_x == 0 && z-center_z == 0) center_taken = true;
-            }
+            if (x-center_x == 0 && z-center_z == 0) center_taken = true;
         }
 
-        if (!center_taken) add(cell(0, 0, 0xFF000000, "You"));
+        if (!center_taken) add_cell(0, 0, 0xFF000000, "You");
+    }
 
-        PaneLabel label = new PaneLabel(name+"\noccurences map (chunks)");
-        label.setAutoResizeWidth(true);
-        label.setAlignmentX(HorzAlignment.MIDDLE);
-        label.setY(45);
-        label.setColor(0xff000000);
-        label.setShadow(false);
-        add(label);
+    void render_greys(){
+        final EntityPlayer p = Minecraft.getMinecraft().thePlayer;
+        int px = (int)p.posX;
+        int pz = (int)p.posZ;
+        Chunk chunk = p.worldObj.getChunkFromBlockCoords(px, pz);
+        ArrayList<int[]> coords = ScanDB.get_grey_area(chunk.xPosition, chunk.zPosition, 31);
+
+        int center_x = chunk.xPosition;
+        int center_z = chunk.zPosition;
+
+        for(int[] e : coords){
+            int x = e[0];
+            int z = e[1];
+            add_cell(x-center_x, z-center_z, 0x22000000, "");
+        }
+    }
+
+    void clear_cells(){
+        if (!cells.isEmpty()) for (PaneBox cell : cells) remove(cell);
+        cells.clear();
+    }
+
+    void add_cell(int x, int z, int colour, String label){
+        PaneBox cell = cell(x, z, colour, label);
+        cells.add(cell);
+        add(cell);
+    }
+
+    private void add_grid_and_labels(){
+        final EntityPlayer p = Minecraft.getMinecraft().thePlayer;
+        int px = (int)p.posX;
+        int pz = (int)p.posZ;
 
         int x_lvl_for_hor_line = -113;
         int x_lvl_for_y_coord_legend = 84;
@@ -145,10 +251,6 @@ public class MapPane extends GlassPane {
         add(lbl("500",   -11,  y_level_for_colour_legend));
         add(lbl("1000+", 80,   y_level_for_colour_legend));
     }
-
-    /* ============================================================================================================== */
-    /* ============================================================================================================== */
-    /* ============================================================================================================== */
 
     private PaneLabel lbl(String txt, int x, int y){
         PaneLabel label2 = new PaneLabel(txt);

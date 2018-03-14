@@ -2,6 +2,7 @@ package lime.chunk_miner;
 
 import cpw.mods.fml.common.Loader;
 import gregtech.GT_Mod;
+import gregtech.common.GT_Proxy;
 import gregtech.common.GT_UndergroundOil;
 import gregtech.common.blocks.GT_Block_Ores_Abstract;
 import ic2.api.recipe.IRecipeInput;
@@ -13,6 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fluids.FluidStack;
@@ -142,6 +144,26 @@ public class Utils {
         return ret;
     }
 
+    public static FluidStack getOilInChunk(Chunk c)
+    {
+        int[] blacklist = GT_Mod.gregtechproxy.mUndergroundOil.BlackList;
+        if (c.worldObj.provider.dimensionId != -1 && c.worldObj.provider.dimensionId != 1)
+        {
+            FluidStack fluidStack = GT_UndergroundOil.undergroundOil(c, -1.0F);
+            if (fluidStack != null)
+            {
+                HashMap<ChunkCoordIntPair, int[]> chunkData = GT_Proxy.dimensionWiseChunkData.get(c.worldObj.provider.dimensionId);
+                if(chunkData != null){
+                    int[] tInts = chunkData.get(c.getChunkCoordIntPair());
+                    if(tInts != null) fluidStack.amount = tInts[GT_Proxy.GTOIL] / GT_UndergroundOil.DIVIDER;
+                }
+
+                return fluidStack;
+            }
+        }
+        return null;
+    }
+
     public static NBTTagCompound scanChunk(Chunk c)
     {
         HashMap<String, Integer> map = new HashMap<String, Integer>();
@@ -166,14 +188,10 @@ public class Utils {
             }
         }
 
-        if (Loader.isModLoaded("gregtech")){
-            int[] blacklist = GT_Mod.gregtechproxy.mUndergroundOil.BlackList;
-            if (w.provider.dimensionId != -1 && w.provider.dimensionId != 1){
-                FluidStack fluidStack = GT_UndergroundOil.undergroundOil(c, -1.0F);
-                if (fluidStack != null){
-                    map.put(fluidToString(fluidStack), fluidStack.amount);
-                }
-            }
+        if (Loader.isModLoaded("gregtech"))
+        {
+            FluidStack oil = getOilInChunk(c);
+            if (oil != null) map.put(fluidToString(oil), oil.amount);
         }
 
         map = sortByValue(map);

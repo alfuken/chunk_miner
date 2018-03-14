@@ -27,6 +27,15 @@ public class OilListPane extends GlassPane {
             scroll_panel.add(btn);
         }
 
+        ClickablePaneLabel btn = GuiHelpers.clickable_label("All Oil and Gas", i++, new Runnable() {
+            @Override
+            public void run() {
+            new MapPane("All Oil and Gas").show();
+            }
+        });
+
+        scroll_panel.add(btn);
+
         add(scroll_panel);
 
     }

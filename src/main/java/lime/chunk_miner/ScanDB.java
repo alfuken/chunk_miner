@@ -3,12 +3,11 @@ package lime.chunk_miner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ScanDB {
     private static long locked_at = 0;
@@ -108,30 +107,14 @@ public class ScanDB {
         return ret;
     }
 
-    /*
-    *
-    * Result format: {
-    *   x1: {
-    *     z1: n1,
-    *     z2: n2,
-    *     z3: n3
-    *   },
-    *   x2: {
-    *     z1: n1,
-    *     z2: n2,
-    *     z3: n3
-    *   }
-    * }
-    *
-    * */
-    public static Map<Integer, Map<Integer, Integer>> get(String name, int x, int z, int range)
+    public static ArrayList<int[]> get(String name, int x, int z, int range)
     {
         initDB();
         Connection         conn = null;
         PreparedStatement  qry  = null;
         ResultSet          r    = null;
         String             sql  = "SELECT * FROM scan_registry WHERE name = ? AND x BETWEEN ? AND ? AND z BETWEEN ? and ? AND dim = ?;";
-        Map<Integer, Map<Integer, Integer>> map = new HashMap<Integer, Map<Integer, Integer>>();
+        ArrayList<int[]> ret = new ArrayList<int[]>();
 
         try
         {
@@ -147,12 +130,7 @@ public class ScanDB {
 
             while (r.next())
             {
-                Map<Integer, Integer> map_x = map.get(r.getInt("x"));
-                if (map_x == null)    map_x = new HashMap<Integer, Integer>();
-
-                    map_x.put(r.getInt("z"), r.getInt("n"));
-
-                map.put(r.getInt("x"), map_x);
+                ret.add(new int[]{r.getInt("x"), r.getInt("z"), r.getInt("n")});
             }
         }
         catch (SQLException e)
@@ -166,17 +144,17 @@ public class ScanDB {
             if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
 
-        return map;
+        return ret;
     }
 
-    public static Map<Integer, Map<Integer, Integer>> get_with_blanks(String name, int x, int z, int range)
+    public static ArrayList<int[]> get_grey_area(int x, int z, int range)
     {
         initDB();
         Connection         conn = null;
         PreparedStatement  qry  = null;
         ResultSet          r    = null;
-        String             sql  = "SELECT * FROM scan_registry WHERE x BETWEEN ? AND ? AND z BETWEEN ? and ? AND dim = ?;";
-        Map<Integer, Map<Integer, Integer>> map = new HashMap<Integer, Map<Integer, Integer>>();
+        String             sql  = "SELECT DISTINCT x, z FROM scan_registry WHERE x BETWEEN ? AND ? AND z BETWEEN ? and ? AND dim = ?;";
+        ArrayList<int[]> ret = new ArrayList<int[]>();
 
         try
         {
@@ -191,16 +169,7 @@ public class ScanDB {
 
             while (r.next())
             {
-                Map<Integer, Integer> map_x = map.get(r.getInt("x"));
-                if (map_x == null)    map_x = new HashMap<Integer, Integer>();
-
-                if (r.getString("name").equals(name)){
-                    map_x.put(r.getInt("z"), r.getInt("n"));
-                } else if (map_x.get(r.getInt("z")) == null) {
-                    map_x.put(r.getInt("z"), -1);
-                }
-
-                map.put(r.getInt("x"), map_x);
+                ret.add(new int[]{r.getInt("x"), r.getInt("z")});
             }
         }
         catch (SQLException e)
@@ -214,7 +183,7 @@ public class ScanDB {
             if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
         }
 
-        return map;
+        return ret;
     }
 
     public static List<String> get(String name)
@@ -380,7 +349,7 @@ public class ScanDB {
     {
         Connection conn = null;
         Statement qry = null;
-        String sql = "ALTER TABLE scan_registry ADD COLUMN dim integer default 0;"+
+        String sql = "ALTER TABLE scan_registry ADD COLUMN dim INTEGER DEFAULT 0;"+
 
                 " CREATE INDEX name_scan_registry_idx2"+
                 " ON scan_registry (name, dim);"+
@@ -406,6 +375,7 @@ public class ScanDB {
             {
                 if (rset.getString(4).equals("dim")) got_dim = true;
             }
+            rset.close();
 
             if (!got_dim)
             {
@@ -425,14 +395,14 @@ public class ScanDB {
         Connection conn = null;
         Statement qry = null;
         String sql = "CREATE TABLE IF NOT EXISTS scan_registry (" +
-            " id integer PRIMARY KEY AUTOINCREMENT," +
-            " name text NOT NULL," +
-            " item text NOT NULL," +
-            " x integer NOT NULL," +
-            " z integer NOT NULL," +
-            " n integer NOT NULL," +
-            " oil integer default 0" +
-            " dim integer default 0" +
+            " id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            " name TEXT NOT NULL," +
+            " item TEXT NOT NULL," +
+            " x INTEGER NOT NULL," +
+            " z INTEGER NOT NULL," +
+            " n INTEGER NOT NULL," +
+            " oil INTEGER default 0," +
+            " dim INTEGER default 0" +
         ");"+
 
         " CREATE INDEX name_scan_registry_idx"+
