@@ -144,6 +144,27 @@ public class Utils {
         return ret;
     }
 
+    public static NBTTagList scanForOil(World w, int player_x, int player_z, int radius)
+    {
+        NBTTagList ret = new NBTTagList();
+        Chunk c = w.getChunkFromBlockCoords(player_x, player_z);
+
+        for (int x = c.xPosition-radius; x <= c.xPosition+radius; x++)
+        {
+            for (int z = c.zPosition-radius; z <= c.zPosition+radius; z++)
+            {
+                FluidStack oil = getOilInChunk(w.getChunkFromChunkCoords(x, z));
+                NBTTagCompound oilTag = new NBTTagCompound();
+                oilTag.setInteger("x", x);
+                oilTag.setInteger("z", z);
+                oilTag.setInteger(fluidToString(oil), oil.amount);
+                ret.appendTag(oilTag);
+            }
+        }
+
+        return ret;
+    }
+
     public static FluidStack getOilInChunk(Chunk c)
     {
         int[] blacklist = GT_Mod.gregtechproxy.mUndergroundOil.BlackList;

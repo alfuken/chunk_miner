@@ -12,8 +12,8 @@ import cpw.mods.fml.relauncher.Side;
 import lime.chunk_miner.items.ModItems;
 import lime.chunk_miner.network.ClearScanDataMessage;
 import lime.chunk_miner.network.OpenScanRegistryMessage;
-import lime.chunk_miner.network.SaveScanReportMessage;
 import lime.chunk_miner.network.PrintScanReportMessage;
+import lime.chunk_miner.network.SaveScanReportMessage;
 import lime.chunk_miner.proxy.CommonProxy;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -25,7 +25,7 @@ public class ChunkMiner {
 
     public static final String MODID = "chunk_miner";
     public static final String MODNAME = "Chunk Miner";
-    public static final String VERSION = "1.7.10-4";
+    public static final String VERSION = "1.7.10-6";
     public static final String DEPENDENCIES = "required-after:IC2";
     public static Logger logger;
     public static Configuration config;

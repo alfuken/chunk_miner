@@ -6,10 +6,10 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.common.registry.GameRegistry;
 import ic2.core.Ic2Items;
-import lime.chunk_miner.events.ChunkLoadingCallback;
 import lime.chunk_miner.ChunkMiner;
 import lime.chunk_miner.Config;
 import lime.chunk_miner.blocks.ModBlocks;
+import lime.chunk_miner.events.ChunkLoadingCallback;
 import lime.chunk_miner.items.ModItems;
 import lime.chunk_miner.tiles.ModTiles;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,6 +19,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.ShapedOreRecipe;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 import java.io.File;
 
@@ -60,6 +61,15 @@ public class CommonProxy {
                 ModItems.chunk_scanner,
                 Items.apple
         );
+
+        String[] oil_cells = new String[]{"cellOil", "cellOilLight", "cellOilHeavy", "cellOilMedium", "cellNatruralGas"};
+        for (String cell : oil_cells){
+            GameRegistry.addRecipe(new ShapelessOreRecipe(new ItemStack(ModItems.oil_scanner),
+                    ModItems.area_scanner,
+                    ModItems.area_scanner,
+                    cell
+            ));
+        }
 
         GameRegistry.addRecipe(new ItemStack(ModItems.scan_registry),
                 "MCB",

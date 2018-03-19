@@ -21,6 +21,7 @@ public class ScanDB {
                 ScanDB.setupPlayerDB();
             }
             ScanDB.migratePlayerDB1();
+//            ScanDB.migratePlayerDB2();
             dbInitialized = true;
         }
     }
@@ -345,6 +346,47 @@ public class ScanDB {
         return set_up;
     }
 
+    private static void setupPlayerDB()
+    {
+        Connection conn = null;
+        Statement qry = null;
+        String sql = "CREATE TABLE IF NOT EXISTS scan_registry (" +
+            " id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            " name TEXT NOT NULL," +
+            " item TEXT NOT NULL," +
+            " x INTEGER NOT NULL," +
+            " z INTEGER NOT NULL," +
+            " n INTEGER NOT NULL," +
+            " oil INTEGER default 0," +
+            " dim INTEGER default 0" +
+        ");"+
+
+        " CREATE INDEX name_scan_registry_idx"+
+        " ON scan_registry (name);"+
+
+        " CREATE INDEX oil_scan_registry_idx"+
+        " ON scan_registry (oil);"+
+
+        " CREATE INDEX main_scan_registry_idx"+
+        " ON scan_registry (name, x, z);"+
+
+        " CREATE INDEX oil_scan_registry_idx"+
+        " ON scan_registry (oil, x, z);";
+
+        try {
+            conn = DriverManager.getConnection(dbFile());
+            qry = conn.createStatement();
+            qry.execute(sql);
+        } catch (SQLException e) {
+            e.printStackTrace(System.out);
+        } finally {
+            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
+        }
+
+    }
+
+
     private static void migratePlayerDB1()
     {
         Connection conn = null;
@@ -390,45 +432,32 @@ public class ScanDB {
         }
     }
 
-    private static void setupPlayerDB()
-    {
-        Connection conn = null;
-        Statement qry = null;
-        String sql = "CREATE TABLE IF NOT EXISTS scan_registry (" +
-            " id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            " name TEXT NOT NULL," +
-            " item TEXT NOT NULL," +
-            " x INTEGER NOT NULL," +
-            " z INTEGER NOT NULL," +
-            " n INTEGER NOT NULL," +
-            " oil INTEGER default 0," +
-            " dim INTEGER default 0" +
-        ");"+
 
-        " CREATE INDEX name_scan_registry_idx"+
-        " ON scan_registry (name);"+
+//    private static void migratePlayerDB2()
+//    {
+//        Connection conn = null;
+//        Statement qry = null;
+//        String sql = "CREATE TABLE IF NOT EXISTS kv_store (" +
+//                     " key TEXT PRIMARY KEY," +
+//                     " int INTEGER," +
+//                     " float REAL," +
+//                     " text TEXT," +
+//                     " blob BLOB" +
+//                     ");"+
+//                     "CREATE INDEX key_kv_store_idx "+
+//                     " ON kv_store (key);";
+//        try {
+//            conn = DriverManager.getConnection(dbFile());
+//            qry = conn.createStatement();
+//            qry.execute(sql);
+//        } catch (SQLException e) {
+//            e.printStackTrace(System.out);
+//        } finally {
+//            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
+//            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
+//        }
+//    }
 
-        " CREATE INDEX oil_scan_registry_idx"+
-        " ON scan_registry (oil);"+
-
-        " CREATE INDEX main_scan_registry_idx"+
-        " ON scan_registry (name, x, z);"+
-
-        " CREATE INDEX oil_scan_registry_idx"+
-        " ON scan_registry (oil, x, z);";
-
-        try {
-            conn = DriverManager.getConnection(dbFile());
-            qry = conn.createStatement();
-            qry.execute(sql);
-        } catch (SQLException e) {
-            e.printStackTrace(System.out);
-        } finally {
-            if (qry  != null) {try { qry.close();  } catch (SQLException e) { e.printStackTrace(System.out); }}
-            if (conn != null) {try { conn.close(); } catch (SQLException e) { e.printStackTrace(System.out); }}
-        }
-
-    }
 
 }
 

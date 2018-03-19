@@ -1,5 +1,6 @@
 item.chunk_miner.chunk_scanner.name=Скан чанка
 item.chunk_miner.area_scanner.name=Скан чанков
+item.chunk_miner.oil_scanner.name=Скан чанков. Только нефть.
 item.chunk_miner.scan_registry.name=Результаты сканов
 tile.chunk_miner.chunk_miner_block.name=Чанк-копалка
 itemGroup.ChunkMiner=Chunk Miner
